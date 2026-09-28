@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codice Colori Resistenze - Quiz Challenge (20 Domande)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .band-slot {
+            transition: all 0.2s ease-in-out;
+        }
+        .band-slot:hover {
+            transform: scale(1.02);
+        }
+        .band-slot.selected {
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+        /* Color band preview classes */
+        .color-black { background-color: #18181b; border: 1px solid #3f3f46; color: #fff; }
+        .color-brown { background-color: #78350f; color: #fff; }
+        .color-red { background-color: #dc2626; color: #fff; }
+        .color-orange { background-color: #ea580c; color: #fff; }
+        .color-yellow { background-color: #ca8a04; color: #000; }
+        .color-green { background-color: #16a34a; color: #fff; }
+        .color-blue { background-color: #2563eb; color: #fff; }
+        .color-violet { background-color: #7c3aed; color: #fff; }
+        .color-grey { background-color: #6b7280; color: #fff; }
+        .color-white { background-color: #f8fafc; color: #000; }
+        .color-gold { background-color: #d97706; background-image: linear-gradient(135deg, #f59e0b, #b45309); color: #fff; }
+        .color-silver { background-color: #94a3b8; background-image: linear-gradient(135deg, #cbd5e1, #64748b); color: #000; }
+        
+        .pulse-timer {
+            animation: pulse-red 1s infinite;
+        }
+        @keyframes pulse-red {
+            0%, 100% { color: #ef4444; transform: scale(1); }
+            50% { color: #f87171; transform: scale(1.08); }
+        }
+
+        /* Custom timer progress bar smooth transition */
+        #timer-bar {
+            transition: width 1s linear, background-color 0.5s ease;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+
+    <!-- Top Bar -->
+    <header class="glass-panel sticky top-0 z-30 px-4 py-3 border-b border-slate-700/50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-microchip text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-white leading-none">Resistor Quiz</h1>
+                    <span class="text-xs text-slate-400 font-medium">Sfida 20 Domande &bull; Codice Colori</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btn-cheatsheet" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 flex items-center gap-2 transition">
+                    <i class="fa-solid fa-book-open text-cyan-400"></i> Tabella Colori
+                </button>
+                <button id="btn-leaderboard" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 flex items-center gap-2 transition">
+                    <i class="fa-solid fa-trophy text-amber-400"></i> Classifica
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto w-full p-4 flex-1 flex flex-col items-center justify-center gap-6">
+
+        <!-- Welcome / Start Screen -->
+        <div id="screen-welcome" class="w-full glass-panel rounded-2xl p-6 md:p-8 text-center max-w-lg shadow-2xl">
+            <div class="w-16 h-16 mx-auto mb-4 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-cyan-400 text-3xl border border-cyan-500/20">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2">Quiz Resistenze Elettriche</h2>
+            <p class="text-slate-400 text-sm mb-6">
+                Metti alla prova la tua conoscenza sul codice colori delle resistenze a 4 bande. Affronterai <strong>20 domande consecutive</strong> con un timer di <strong>60 secondi per domanda</strong>!
+            </p>
+            
+            <form id="form-start" class="space-y-4">
+                <div class="text-left">
+                    <label for="player-nickname" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Il tuo Nickname / Nome</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        <input type="text" id="player-nickname" required maxlength="15" placeholder="Es. Mario Rossi" 
+                               class="w-full pl-10 pr-4 py-3 bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold shadow-lg shadow-cyan-500/25 transition transform active:scale-98">
+                    Inizia la Sfida (20 Quesiti) <i class="fa-solid fa-play ml-2"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Gameplay Screen -->
+        <div id="screen-game" class="w-full max-w-2xl glass-panel rounded-2xl p-4 md:p-6 shadow-2xl hidden flex-col gap-6">
+            
+            <!-- HUD (Score, Question Progress, Timer) -->
+            <div class="flex items-center justify-between border-b border-slate-700/60 pb-4">
+                <div>
+                    <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Giocatore</span>
+                    <div id="hud-nickname" class="text-slate-200 font-bold text-sm md:text-base">--</div>
+                </div>
+                <div class="flex items-center gap-4 sm:gap-6">
+                    <div class="text-center">
+                        <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Domanda</span>
+                        <div id="hud-question-num" class="text-amber-400 font-extrabold text-lg md:text-xl">1 / 20</div>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Punti</span>
+                        <div id="hud-score" class="text-cyan-400 font-extrabold text-lg md:text-xl">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timer Progress Bar & Counter -->
+            <div class="space-y-1">
+                <div class="flex justify-between items-center text-xs text-slate-400 font-semibold uppercase">
+                    <span><i class="fa-regular fa-clock mr-1"></i> Tempo Restante</span>
+                    <span id="hud-timer" class="font-mono font-bold text-slate-200">60s</span>
+                </div>
+                <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                    <div id="timer-bar" class="h-full bg-cyan-500 w-full rounded-full"></div>
+                </div>
+            </div>
+
+            <!-- Target Resistance Display -->
+            <div class="text-center bg-slate-900/60 rounded-xl p-4 border border-slate-800">
+                <span class="text-xs text-cyan-400 font-semibold uppercase tracking-wider mb-1 block">Configura la resistenza per:</span>
+                <div id="target-value" class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">560 kΩ <span class="text-lg text-slate-400 font-normal">±5%</span></div>
+            </div>
+
+            <!-- Resistor Visualizer (SVG) -->
+            <div class="relative py-2 flex justify-center items-center overflow-hidden">
+                <svg viewBox="0 0 500 120" class="w-full max-w-md h-auto drop-shadow-xl">
+                    <!-- Wire Left -->
+                    <rect x="0" y="55" width="100" height="10" fill="#94a3b8" rx="2" />
+                    <!-- Wire Right -->
+                    <rect x="400" y="55" width="100" height="10" fill="#94a3b8" rx="2" />
+                    <!-- Resistor Body -->
+                    <path d="M 100 60 
+                             C 100 20, 130 25, 150 25
+                             L 350 25
+                             C 370 25, 400 20, 400 60
+                             C 400 100, 370 95, 350 95
+                             L 150 95
+                             C 130 95, 100 100, 100 60 Z" 
+                          fill="#d1d5db" stroke="#9ca3af" stroke-width="2"/>
+                    <!-- Highlight for 3D effect -->
+                    <path d="M 110 40 Q 250 30 390 40" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.4" />
+                    
+                    <!-- Color Band 1 -->
+                    <rect id="svg-band-1" x="145" y="25.5" width="22" height="69" fill="#18181b" rx="2" />
+                    <!-- Color Band 2 -->
+                    <rect id="svg-band-2" x="200" y="25.5" width="22" height="69" fill="#18181b" rx="2" />
+                    <!-- Color Band 3 (Multiplier) -->
+                    <rect id="svg-band-3" x="255" y="25.5" width="22" height="69" fill="#18181b" rx="2" />
+                    <!-- Color Band 4 (Tolerance) -->
+                    <rect id="svg-band-4" x="330" y="25.5" width="22" height="69" fill="#d97706" rx="2" />
+                </svg>
+            </div>
+
+            <!-- Band Selection Slots -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+                <button type="button" data-slot="0" class="band-slot active-slot p-3 rounded-xl bg-slate-800/90 border border-slate-700 text-left relative overflow-hidden group">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">1ª Cifra</span>
+                    <div id="slot-0-display" class="mt-1 font-semibold text-sm flex items-center justify-between">
+                        <span class="color-name">Seleziona</span>
+                        <span id="slot-0-badge" class="w-4 h-4 rounded-full bg-slate-600 inline-block border border-slate-500"></span>
+                    </div>
+                </button>
+                <button type="button" data-slot="1" class="band-slot p-3 rounded-xl bg-slate-800/90 border border-slate-700 text-left relative overflow-hidden group">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">2ª Cifra</span>
+                    <div id="slot-1-display" class="mt-1 font-semibold text-sm flex items-center justify-between">
+                        <span class="color-name">Seleziona</span>
+                        <span id="slot-1-badge" class="w-4 h-4 rounded-full bg-slate-600 inline-block border border-slate-500"></span>
+                    </div>
+                </button>
+                <button type="button" data-slot="2" class="band-slot p-3 rounded-xl bg-slate-800/90 border border-slate-700 text-left relative overflow-hidden group">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Moltiplicatore</span>
+                    <div id="slot-2-display" class="mt-1 font-semibold text-sm flex items-center justify-between">
+                        <span class="color-name">Seleziona</span>
+                        <span id="slot-2-badge" class="w-4 h-4 rounded-full bg-slate-600 inline-block border border-slate-500"></span>
+                    </div>
+                </button>
+                <button type="button" data-slot="3" class="band-slot p-3 rounded-xl bg-slate-800/90 border border-slate-700 text-left relative overflow-hidden group">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Tolleranza</span>
+                    <div id="slot-3-display" class="mt-1 font-semibold text-sm flex items-center justify-between">
+                        <span class="color-name">Seleziona</span>
+                        <span id="slot-3-badge" class="w-4 h-4 rounded-full bg-slate-600 inline-block border border-slate-500"></span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Palette Selection Buttons -->
+            <div id="color-palette-container" class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                <p id="palette-label" class="text-xs text-slate-400 font-semibold mb-2">Scegli il colore per la <span id="active-slot-name" class="text-cyan-400">1ª Cifra</span>:</p>
+                <div id="color-palette" class="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                    <!-- Dynamic buttons injected via JS -->
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex gap-3 pt-2">
+                <button id="btn-submit" disabled class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold shadow-lg shadow-emerald-500/20 transition">
+                    Verifica Risposta <i class="fa-solid fa-check ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Feedback & Explanation Modal/Overlay -->
+        <div id="modal-explanation" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+            <div class="glass-panel w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-700/60 flex flex-col items-center text-center">
+                <div id="explanation-icon-container" class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-3 border">
+                    <!-- Icon injected dynamically -->
+                </div>
+                <h3 id="explanation-title" class="text-2xl font-extrabold text-white mb-1">Soluzione Quesito</h3>
+                <p id="explanation-subtitle" class="text-xs text-slate-400 mb-4">Ecco la spiegazione dettagliata per questa resistenza:</p>
+
+                <!-- Detailed Breakdown Box -->
+                <div class="w-full bg-slate-900/90 rounded-xl p-4 border border-slate-800 text-left space-y-3 mb-5">
+                    <div class="flex justify-between items-center text-xs pb-2 border-b border-slate-800">
+                        <span class="text-slate-400">Valore Target:</span>
+                        <span id="exp-target-val" class="font-extrabold text-white text-sm">--</span>
+                    </div>
+                    <div id="exp-bands-container" class="space-y-2">
+                        <!-- Correct bands listed here -->
+                    </div>
+                </div>
+
+                <button id="btn-next-question" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold shadow-lg transition">
+                    Prossima Domanda <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="screen-gameover" class="w-full glass-panel rounded-2xl p-6 md:p-8 text-center max-w-lg shadow-2xl hidden flex-col items-center">
+            <div class="w-16 h-16 mx-auto mb-4 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-400 text-3xl border border-amber-500/20">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-1">Quiz Completato!</h2>
+            <p class="text-slate-400 text-sm mb-6">Ottimo lavoro! Hai completato tutte le 20 domande.</p>
+
+            <div class="w-full bg-slate-900/80 rounded-xl p-4 border border-slate-800 mb-6 space-y-3">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-400">Giocatore:</span>
+                    <span id="final-nickname" class="font-bold text-white">--</span>
+                </div>
+                <div class="flex justify-between items-center text-sm border-t border-slate-800 pt-2">
+                    <span class="text-slate-400">Punteggio Finale:</span>
+                    <span class="font-extrabold text-2xl text-cyan-400"><span id="final-score">0</span> / 20</span>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 w-full">
+                <button id="btn-restart" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold shadow-lg shadow-cyan-500/25 transition">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> Gioca Ancora
+                </button>
+                <button id="btn-show-scores" class="flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold transition">
+                    <i class="fa-solid fa-trophy mr-2 text-amber-400"></i> Classifica
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Leaderboard Modal -->
+    <div id="modal-leaderboard" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-700/60 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-amber-400 text-xl"></i>
+                    <h3 class="text-xl font-bold text-white">Classifica Globale</h3>
+                </div>
+                <button id="close-leaderboard" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="text-xs text-slate-400 mb-3 flex justify-between px-2 font-semibold uppercase">
+                <span>Pos / Giocatore</span>
+                <span>Punteggio (su 20)</span>
+            </div>
+
+            <div id="leaderboard-list" class="overflow-y-auto flex-1 space-y-2 pr-1 my-2">
+                <!-- Leaderboard rows injected via JS -->
+                <div class="text-center py-8 text-slate-500">Caricamento classifica...</div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800 text-center">
+                <button id="btn-close-lb" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm transition">
+                    Chiudi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cheat Sheet Modal -->
+    <div id="modal-cheatsheet" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-lg rounded-2xl p-6 shadow-2xl border border-slate-700/60 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-book-open text-cyan-400 text-xl"></i>
+                    <h3 class="text-xl font-bold text-white">Tabella Codice Colori</h3>
+                </div>
+                <button id="close-cheatsheet" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 pr-1">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-700 text-slate-400 uppercase font-semibold">
+                            <th class="py-2 px-2">Colore</th>
+                            <th class="py-2 px-2 text-center">1ª-2ª Cifra</th>
+                            <th class="py-2 px-2 text-center">Moltiplicatore</th>
+                            <th class="py-2 px-2 text-right">Tolleranza</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cheatsheet-body" class="divide-y divide-slate-800 text-slate-300">
+                        <!-- Populated dynamically via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800 text-center">
+                <button id="btn-close-cs" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm transition">
+                    Capito!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Banner Toast -->
+    <div id="toast-feedback" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl font-bold text-sm shadow-2xl transition transform translate-y-20 opacity-0 flex items-center gap-2 pointer-events-none">
+        <i id="toast-icon" class="fa-solid"></i>
+        <span id="toast-msg">Messaggio</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-3 text-center text-xs text-slate-500">
+        Codice Colori Resistenze &bull; Strumento Didattico per Elettronica
+    </footer>
+
+    <!-- Firebase SDK Modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'resistor-quiz-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "dummy",
+            authDomain: "dummy.firebaseapp.com",
+            projectId: "dummy",
+            storageBucket: "dummy.appspot.com",
+            messagingSenderId: "123",
+            appId: "123"
+        };
+
+        let app, auth, db, currentUser = null;
+
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            // Authenticate user
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                signInWithCustomToken(auth, __initial_auth_token).then(cred => {
+                    currentUser = cred.user;
+                    initLeaderboardListener();
+                }).catch(() => {
+                    signInAnonymously(auth).then(cred => {
+                        currentUser = cred.user;
+                        initLeaderboardListener();
+                    });
+                });
+            } else {
+                signInAnonymously(auth).then(cred => {
+                    currentUser = cred.user;
+                    initLeaderboardListener();
+                }).catch(e => console.warn("Firestore Auth error:", e));
+            }
+        } catch (e) {
+            console.warn("Firebase Init fallback Mode:", e);
+        }
+
+        // Leaderboard real-time fetching
+        let leaderboardData = [];
+        function initLeaderboardListener() {
+            if (!db) return;
+            // RULE 1 & RULE 2 compliant path & query
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+            onSnapshot(colRef, (snapshot) => {
+                const list = [];
+                snapshot.forEach((doc) => {
+                    list.push(doc.data());
+                });
+                // Sort in memory by score descending, then date ascending
+                list.sort((a, b) => (b.score || 0) - (a.score || 0));
+                leaderboardData = list.slice(0, 10);
+                if (window.renderLeaderboard) window.renderLeaderboard();
+            }, (error) => {
+                console.error("Leaderboard error:", error);
+            });
+        }
+
+        async function saveScoreToLeaderboard(nickname, score) {
+            if (!db || !currentUser) return;
+            try {
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                await addDoc(colRef, {
+                    nickname: nickname,
+                    score: score,
+                    timestamp: Date.now()
+                });
+            } catch (err) {
+                console.error("Error saving score:", err);
+            }
+        }
+
+        // Expose function globally for the game script
+        window.saveGameScore = saveScoreToLeaderboard;
+        window.getLeaderboardData = () => leaderboardData;
+    </script>
+
+    <script>
+        /* --- Color Definitions --- */
+        const COLOR_CODES = [
+            { name: "Nero", key: "black", value: 0, mult: 1, multStr: "x1 Ω", tol: null, hex: "#18181b" },
+            { name: "Marrone", key: "brown", value: 1, mult: 10, multStr: "x10 Ω", tol: "±1%", tolVal: 1, hex: "#78350f" },
+            { name: "Rosso", key: "red", value: 2, mult: 100, multStr: "x100 Ω", tol: "±2%", tolVal: 2, hex: "#dc2626" },
+            { name: "Arancione", key: "orange", value: 3, mult: 1000, multStr: "x1 kΩ", tol: null, hex: "#ea580c" },
+            { name: "Giallo", key: "yellow", value: 4, mult: 10000, multStr: "x10 kΩ", tol: null, hex: "#ca8a04" },
+            { name: "Verde", key: "green", value: 5, mult: 100000, multStr: "x100 kΩ", tol: "±0.5%", tolVal: 0.5, hex: "#16a34a" },
+            { name: "Blu", key: "blue", value: 6, mult: 1000000, multStr: "x1 MΩ", tol: "±0.25%", tolVal: 0.25, hex: "#2563eb" },
+            { name: "Viola", key: "violet", value: 7, mult: 10000000, multStr: "x10 MΩ", tol: "±0.1%", tolVal: 0.1, hex: "#7c3aed" },
+            { name: "Grigio", key: "grey", value: 8, mult: 100000000, multStr: "x100 MΩ", tol: "±0.05%", tolVal: 0.05, hex: "#6b7280" },
+            { name: "Bianco", key: "white", value: 9, mult: 1000000000, multStr: "x1 GΩ", tol: null, hex: "#f8fafc" },
+            { name: "Oro", key: "gold", value: null, mult: 0.1, multStr: "x0.1 Ω", tol: "±5%", tolVal: 5, hex: "#d97706" },
+            { name: "Argento", key: "silver", value: null, mult: 0.01, multStr: "x0.01 Ω", tol: "±10%", tolVal: 10, hex: "#94a3b8" }
+        ];
+
+        const TOTAL_QUESTIONS = 20;
+        const QUESTION_TIME_LIMIT = 60; // 60 seconds per question
+
+        /* --- Audio Synthesizer (Web Audio API) --- */
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+            }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playTone(freq, type = 'sine', duration = 0.1) {
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e){}
+            }
+            click() { this.playTone(800, 'triangle', 0.05); }
+            correct() {
+                this.playTone(523.25, 'sine', 0.1); // C5
+                setTimeout(() => this.playTone(659.25, 'sine', 0.1), 100); // E5
+                setTimeout(() => this.playTone(783.99, 'sine', 0.2), 200); // G5
+            }
+            wrong() {
+                this.playTone(220, 'sawtooth', 0.15);
+                setTimeout(() => this.playTone(180, 'sawtooth', 0.25), 150);
+            }
+            tick() { this.playTone(1200, 'sine', 0.02); }
+        }
+        const sfx = new SoundFX();
+
+        /* --- Game State --- */
+        let state = {
+            nickname: "",
+            score: 0,
+            currentQuestion: 1,
+            timeLeft: QUESTION_TIME_LIMIT,
+            timerId: null,
+            activeSlot: 0, // 0, 1, 2, 3
+            selectedBands: [null, null, null, null], // color keys
+            targetResistor: null
+        };
+
+        /* --- DOM Elements --- */
+        const screens = {
+            welcome: document.getElementById('screen-welcome'),
+            game: document.getElementById('screen-game'),
+            gameover: document.getElementById('screen-gameover')
+        };
+        const hud = {
+            nickname: document.getElementById('hud-nickname'),
+            score: document.getElementById('hud-score'),
+            questionNum: document.getElementById('hud-question-num'),
+            timer: document.getElementById('hud-timer'),
+            timerBar: document.getElementById('timer-bar')
+        };
+        const targetValEl = document.getElementById('target-value');
+        const colorPaletteEl = document.getElementById('color-palette');
+        const activeSlotNameEl = document.getElementById('active-slot-name');
+        const btnSubmit = document.getElementById('btn-submit');
+        const modalExp = document.getElementById('modal-explanation');
+
+        /* --- Utility Functions --- */
+        function formatResistance(ohms) {
+            if (ohms >= 1e6) return `${+(ohms / 1e6).toFixed(2)} MΩ`;
+            if (ohms >= 1e3) return `${+(ohms / 1e3).toFixed(2)} kΩ`;
+            return `${+ohms.toFixed(2)} Ω`;
+        }
+
+        function generateRandomResistor() {
+            // E12 Standard values digits
+            const e12Digits = [10, 12, 15, 18, 22, 27, 33, 39, 47, 56, 68, 82];
+            const randomPair = e12Digits[Math.floor(Math.random() * e12Digits.length)];
+            
+            const digit1Val = Math.floor(randomPair / 10);
+            const digit2Val = randomPair % 10;
+
+            // Multipliers (from 0.01 to 1M)
+            const possibleMults = [0.01, 0.1, 1, 10, 100, 1000, 10000, 100000, 1000000];
+            const multVal = possibleMults[Math.floor(Math.random() * possibleMults.length)];
+
+            // Tolerances (5% Gold or 10% Silver most common)
+            const possibleTols = [5, 10, 1, 2];
+            const tolVal = possibleTols[Math.floor(Math.random() * possibleTols.length)];
+
+            const band1 = COLOR_CODES.find(c => c.value === digit1Val);
+            const band2 = COLOR_CODES.find(c => c.value === digit2Val);
+            const band3 = COLOR_CODES.find(c => c.mult === multVal);
+            const band4 = COLOR_CODES.find(c => c.tolVal === tolVal);
+
+            const totalOhms = (digit1Val * 10 + digit2Val) * multVal;
+
+            return {
+                targetOhms: totalOhms,
+                formattedText: formatResistance(totalOhms),
+                toleranceText: band4.tol,
+                correctBands: [band1.key, band2.key, band3.key, band4.key],
+                bandObjects: [band1, band2, band3, band4]
+            };
+        }
+
+        /* --- Render Cheat Sheet --- */
+        function buildCheatSheet() {
+            const tbody = document.getElementById('cheatsheet-body');
+            tbody.innerHTML = '';
+            COLOR_CODES.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/50 transition";
+                tr.innerHTML = `
+                    <td class="py-2 px-2 font-medium flex items-center gap-2">
+                        <span class="w-3.5 h-3.5 rounded-full border border-slate-600 inline-block" style="background-color: ${c.hex}"></span>
+                        ${c.name}
+                    </td>
+                    <td class="py-2 px-2 text-center font-mono text-slate-400">${c.value !== null ? c.value : '-'}</td>
+                    <td class="py-2 px-2 text-center font-mono text-cyan-400">${c.multStr}</td>
+                    <td class="py-2 px-2 text-right font-mono text-amber-400">${c.tol || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /* --- Render Color Palette for Active Slot --- */
+        function renderPalette() {
+            colorPaletteEl.innerHTML = '';
+            
+            // Filter options according to active slot requirements
+            let availableColors = COLOR_CODES;
+            if (state.activeSlot === 0 || state.activeSlot === 1) {
+                // Digit slots: must have digit value
+                availableColors = COLOR_CODES.filter(c => c.value !== null);
+                // First band cannot be black (value 0)
+                if (state.activeSlot === 0) {
+                    availableColors = availableColors.filter(c => c.value !== 0);
+                }
+            } else if (state.activeSlot === 2) {
+                // Multiplier slot
+                availableColors = COLOR_CODES.filter(c => c.mult !== undefined);
+            } else if (state.activeSlot === 3) {
+                // Tolerance slot
+                availableColors = COLOR_CODES.filter(c => c.tol !== null);
+            }
+
+            const slotNames = ["1ª Cifra", "2ª Cifra", "Moltiplicatore", "Tolleranza"];
+            activeSlotNameEl.textContent = slotNames[state.activeSlot];
+
+            availableColors.forEach(color => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `p-2 rounded-xl border border-slate-700 flex flex-col items-center justify-center text-xs font-semibold hover:scale-105 active:scale-95 transition shadow-sm`;
+                btn.style.backgroundColor = color.hex;
+                btn.style.color = (color.key === 'yellow' || color.key === 'white' || color.key === 'silver') ? '#000' : '#fff';
+                
+                btn.innerHTML = `<span>${color.name}</span>`;
+
+                btn.addEventListener('click', () => {
+                    sfx.click();
+                    selectColorForSlot(color.key);
+                });
+                colorPaletteEl.appendChild(btn);
+            });
+        }
+
+        function selectColorForSlot(colorKey) {
+            state.selectedBands[state.activeSlot] = colorKey;
+            updateSlotDisplays();
+            updateSVG();
+
+            // Auto-advance to next empty slot
+            const nextEmpty = state.selectedBands.findIndex(b => b === null);
+            if (nextEmpty !== -1) {
+                setActiveSlot(nextEmpty);
+            } else {
+                if (state.activeSlot < 3) setActiveSlot(state.activeSlot + 1);
+            }
+
+            checkFormCompletion();
+        }
+
+        function setActiveSlot(slotIndex) {
+            state.activeSlot = slotIndex;
+            document.querySelectorAll('.band-slot').forEach((el, idx) => {
+                if (idx === slotIndex) {
+                    el.classList.add('selected', 'bg-slate-700/80');
+                } else {
+                    el.classList.remove('selected', 'bg-slate-700/80');
+                }
+            });
+            renderPalette();
+        }
+
+        function updateSlotDisplays() {
+            state.selectedBands.forEach((colorKey, idx) => {
+                const nameSpan = document.querySelector(`#slot-${idx}-display .color-name`);
+                const badge = document.getElementById(`slot-${idx}-badge`);
+                if (colorKey) {
+                    const c = COLOR_CODES.find(item => item.key === colorKey);
+                    nameSpan.textContent = c.name;
+                    badge.style.backgroundColor = c.hex;
+                } else {
+                    nameSpan.textContent = "Seleziona";
+                    badge.style.backgroundColor = '#475569';
+                }
+            });
+        }
+
+        function updateSVG() {
+            state.selectedBands.forEach((colorKey, idx) => {
+                const svgBand = document.getElementById(`svg-band-${idx + 1}`);
+                if (colorKey) {
+                    const c = COLOR_CODES.find(item => item.key === colorKey);
+                    svgBand.setAttribute('fill', c.hex);
+                } else {
+                    svgBand.setAttribute('fill', '#18181b'); // Default dark
+                }
+            });
+        }
+
+        function checkFormCompletion() {
+            const isComplete = state.selectedBands.every(b => b !== null);
+            btnSubmit.disabled = !isComplete;
+        }
+
+        /* --- Start Game --- */
+        function startGame() {
+            state.score = 0;
+            state.currentQuestion = 1;
+
+            hud.score.textContent = "0";
+            hud.questionNum.textContent = `1 / ${TOTAL_QUESTIONS}`;
+            hud.nickname.textContent = state.nickname;
+
+            screens.welcome.classList.add('hidden');
+            screens.gameover.classList.add('hidden');
+            screens.game.classList.remove('hidden');
+            screens.game.classList.add('flex');
+
+            loadQuestion();
+        }
+
+        function startQuestionTimer() {
+            clearInterval(state.timerId);
+            state.timeLeft = QUESTION_TIME_LIMIT;
+            
+            updateTimerUI();
+
+            state.timerId = setInterval(() => {
+                state.timeLeft--;
+                updateTimerUI();
+
+                if (state.timeLeft <= 10 && state.timeLeft > 0) {
+                    sfx.tick();
+                }
+
+                if (state.timeLeft <= 0) {
+                    clearInterval(state.timerId);
+                    sfx.wrong();
+                    showExplanation(false, "Tempo Scaduto!");
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            hud.timer.textContent = `${state.timeLeft}s`;
+            const percentage = (state.timeLeft / QUESTION_TIME_LIMIT) * 100;
+            hud.timerBar.style.width = `${percentage}%`;
+
+            if (state.timeLeft <= 10) {
+                hud.timerBar.style.backgroundColor = "#ef4444"; // Red
+                hud.timer.classList.add('pulse-timer');
+            } else if (state.timeLeft <= 25) {
+                hud.timerBar.style.backgroundColor = "#f59e0b"; // Yellow
+                hud.timer.classList.remove('pulse-timer');
+            } else {
+                hud.timerBar.style.backgroundColor = "#06b6d4"; // Cyan
+                hud.timer.classList.remove('pulse-timer');
+            }
+        }
+
+        function loadQuestion() {
+            hud.questionNum.textContent = `${state.currentQuestion} / ${TOTAL_QUESTIONS}`;
+            state.targetResistor = generateRandomResistor();
+            targetValEl.innerHTML = `${state.targetResistor.formattedText} <span class="text-lg text-slate-400 font-normal">${state.targetResistor.toleranceText}</span>`;
+
+            state.selectedBands = [null, null, null, null];
+            updateSlotDisplays();
+            updateSVG();
+            setActiveSlot(0);
+            checkFormCompletion();
+
+            startQuestionTimer();
+        }
+
+        /* --- Verify Answer & Show Explanation --- */
+        function checkAnswer() {
+            clearInterval(state.timerId);
+            const correct = state.targetResistor.correctBands;
+            const user = state.selectedBands;
+
+            const isCorrect = correct.every((val, idx) => val === user[idx]);
+
+            if (isCorrect) {
+                sfx.correct();
+                state.score++;
+                hud.score.textContent = state.score;
+                showExplanation(true, "Risposta Corretta!");
+            } else {
+                sfx.wrong();
+                showExplanation(false, "Risposta Errata!");
+            }
+        }
+
+        function showExplanation(isCorrect, titleText) {
+            const iconContainer = document.getElementById('explanation-icon-container');
+            const titleEl = document.getElementById('explanation-title');
+            const subTitleEl = document.getElementById('explanation-subtitle');
+            const targetValExp = document.getElementById('exp-target-val');
+            const bandsContainer = document.getElementById('exp-bands-container');
+
+            titleEl.textContent = titleText;
+            targetValExp.textContent = `${state.targetResistor.formattedText} (${state.targetResistor.toleranceText})`;
+
+            if (isCorrect) {
+                iconContainer.className = "w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400";
+                iconContainer.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+                subTitleEl.textContent = "Ottimo lavoro! Hai composto la sequenza di colori esatta:";
+            } else {
+                iconContainer.className = "w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-3 bg-rose-500/10 border border-rose-500/30 text-rose-400";
+                iconContainer.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+                subTitleEl.textContent = "Ecco la soluzione corretta per questo valore:";
+            }
+
+            // Render Solution Bands
+            bandsContainer.innerHTML = '';
+            const slotLabels = ["1ª Cifra", "2ª Cifra", "Moltiplicatore", "Tolleranza"];
+            state.targetResistor.bandObjects.forEach((band, idx) => {
+                let desc = "";
+                if (idx === 0 || idx === 1) desc = `Valore = ${band.value}`;
+                else if (idx === 2) desc = `Fattore = ${band.multStr}`;
+                else if (idx === 3) desc = `Tolleranza = ${band.tol}`;
+
+                const bandRow = document.createElement('div');
+                bandRow.className = "flex items-center justify-between p-2 rounded-lg bg-slate-800/80 border border-slate-700/50 text-xs";
+                bandRow.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full border border-slate-600 inline-block shadow-sm" style="background-color: ${band.hex}"></span>
+                        <span class="font-bold text-slate-200">${slotLabels[idx]}: ${band.name}</span>
+                    </div>
+                    <span class="font-mono text-cyan-400 font-semibold">${desc}</span>
+                `;
+                bandsContainer.appendChild(bandRow);
+            });
+
+            modalExp.classList.remove('hidden');
+        }
+
+        function handleNextQuestion() {
+            modalExp.classList.add('hidden');
+            if (state.currentQuestion < TOTAL_QUESTIONS) {
+                state.currentQuestion++;
+                loadQuestion();
+            } else {
+                endGame();
+            }
+        }
+
+        /* --- End Game --- */
+        function endGame() {
+            clearInterval(state.timerId);
+            screens.game.classList.add('hidden');
+            screens.game.classList.remove('flex');
+            screens.gameover.classList.remove('hidden');
+            screens.gameover.classList.add('flex');
+
+            document.getElementById('final-nickname').textContent = state.nickname;
+            document.getElementById('final-score').textContent = state.score;
+
+            // Save score to Firebase Firestore
+            if (window.saveGameScore) {
+                window.saveGameScore(state.nickname, state.score);
+            }
+        }
+
+        window.renderLeaderboard = function() {
+            const listEl = document.getElementById('leaderboard-list');
+            const data = window.getLeaderboardData ? window.getLeaderboardData() : [];
+
+            if (data.length === 0) {
+                listEl.innerHTML = `<div class="text-center py-8 text-slate-500">Nessun punteggio ancora registrato. Gioca per primo!</div>`;
+                return;
+            }
+
+            listEl.innerHTML = '';
+            data.forEach((entry, idx) => {
+                let badge = `<span class="w-6 text-center font-bold text-slate-500">${idx + 1}</span>`;
+                if (idx === 0) badge = `<span class="text-lg">🥇</span>`;
+                if (idx === 1) badge = `<span class="text-lg">🥈</span>`;
+                if (idx === 2) badge = `<span class="text-lg">🥉</span>`;
+
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-800/80";
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        ${badge}
+                        <span class="font-semibold text-slate-200 text-sm">${escapeHtml(entry.nickname || 'Anonimo')}</span>
+                    </div>
+                    <span class="font-extrabold text-cyan-400 font-mono text-sm">${entry.score} / 20</span>
+                `;
+                listEl.appendChild(row);
+            });
+        };
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        /* --- Event Listeners Setup --- */
+        document.addEventListener('DOMContentLoaded', () => {
+            sfx.init();
+            buildCheatSheet();
+
+            // Start Game Form
+            document.getElementById('form-start').addEventListener('submit', (e) => {
+                e.preventDefault();
+                sfx.init();
+                const nameInput = document.getElementById('player-nickname').value.trim();
+                if (nameInput) {
+                    state.nickname = nameInput;
+                    startGame();
+                }
+            });
+
+            // Slot Click Handlers
+            document.querySelectorAll('.band-slot').forEach(slot => {
+                slot.addEventListener('click', () => {
+                    sfx.click();
+                    const slotIdx = parseInt(slot.getAttribute('data-slot'));
+                    setActiveSlot(slotIdx);
+                });
+            });
+
+            // Submit Answer Button
+            btnSubmit.addEventListener('click', checkAnswer);
+
+            // Next Question from Explanation Modal
+            document.getElementById('btn-next-question').addEventListener('click', () => {
+                sfx.click();
+                handleNextQuestion();
+            });
+
+            // Restart Button
+            document.getElementById('btn-restart').addEventListener('click', () => {
+                sfx.click();
+                startGame();
+            });
+
+            // Leaderboard Modal Controls
+            const modalLb = document.getElementById('modal-leaderboard');
+            const openLb = () => {
+                sfx.click();
+                if (window.renderLeaderboard) window.renderLeaderboard();
+                modalLb.classList.remove('hidden');
+            };
+            const closeLb = () => {
+                sfx.click();
+                modalLb.classList.add('hidden');
+            };
+
+            document.getElementById('btn-leaderboard').addEventListener('click', openLb);
+            document.getElementById('btn-show-scores').addEventListener('click', openLb);
+            document.getElementById('close-leaderboard').addEventListener('click', closeLb);
+            document.getElementById('btn-close-lb').addEventListener('click', closeLb);
+
+            // Cheat Sheet Modal Controls
+            const modalCs = document.getElementById('modal-cheatsheet');
+            document.getElementById('btn-cheatsheet').addEventListener('click', () => {
+                sfx.click();
+                modalCs.classList.remove('hidden');
+            });
+            document.getElementById('close-cheatsheet').addEventListener('click', () => {
+                sfx.click();
+                modalCs.classList.add('hidden');
+            });
+            document.getElementById('btn-close-cs').addEventListener('click', () => {
+                sfx.click();
+                modalCs.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
