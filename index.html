@@ -1,979 +1,726 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codice Colori Resistenze - Quiz Challenge (20 Domande)</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Codice Colori Resistenze - 20 Domande</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            techDark: '#0f172a',
+            techCard: '#1e293b',
+            accentCyan: '#06b6d4',
+            accentEmerald: '#10b981',
+            accentAmber: '#f59e0b',
+            accentRose: '#f43f5e'
+          }
         }
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .band-slot {
-            transition: all 0.2s ease-in-out;
-        }
-        .band-slot:hover {
-            transform: scale(1.02);
-        }
-        .band-slot.selected {
-            border-color: #38bdf8;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
-        }
-        /* Color band preview classes */
-        .color-black { background-color: #18181b; border: 1px solid #3f3f46; color: #fff; }
-        .color-brown { background-color: #78350f; color: #fff; }
-        .color-red { background-color: #dc2626; color: #fff; }
-        .color-orange { background-color: #ea580c; color: #fff; }
-        .color-yellow { background-color: #ca8a04; color: #000; }
-        .color-green { background-color: #16a34a; color: #fff; }
-        .color-blue { background-color: #2563eb; color: #fff; }
-        .color-violet { background-color: #7c3aed; color: #fff; }
-        .color-grey { background-color: #6b7280; color: #fff; }
-        .color-white { background-color: #f8fafc; color: #000; }
-        .color-gold { background-color: #d97706; background-image: linear-gradient(135deg, #f59e0b, #b45309); color: #fff; }
-        .color-silver { background-color: #94a3b8; background-image: linear-gradient(135deg, #cbd5e1, #64748b); color: #000; }
-        
-        .pulse-timer {
-            animation: pulse-red 1s infinite;
-        }
-        @keyframes pulse-red {
-            0%, 100% { color: #ef4444; transform: scale(1); }
-            50% { color: #f87171; transform: scale(1.08); }
-        }
-
-        /* Custom timer progress bar smooth transition */
-        #timer-bar {
-            transition: width 1s linear, background-color 0.5s ease;
-        }
-        
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1e293b;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 3px;
-        }
-    </style>
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@300;400;600;800&display=swap');
+    body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f8fafc; }
+    .font-mono { font-family: 'Fira Code', monospace; }
+    .bg-grid { background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0); background-size: 24px 24px; }
+    .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .band-select-active { ring: 2px solid #06b6d4; transform: scale(1.05); }
+    @keyframes pulseGlow { 0%, 100% { filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.4)); } 50% { filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.8)); } }
+    .resistor-glow { animation: pulseGlow 3s infinite ease-in-out; }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+<body class="min-h-screen bg-grid text-slate-100 flex flex-col justify-between overflow-x-hidden">
 
-    <!-- Top Bar -->
-    <header class="glass-panel sticky top-0 z-30 px-4 py-3 border-b border-slate-700/50">
-        <div class="max-w-5xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl shadow-lg shadow-cyan-500/20">
-                    <i class="fa-solid fa-microchip text-xl text-white"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold text-white leading-none">Resistor Quiz</h1>
-                    <span class="text-xs text-slate-400 font-medium">Sfida 20 Domande &bull; Codice Colori</span>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                <button id="btn-cheatsheet" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 flex items-center gap-2 transition">
-                    <i class="fa-solid fa-book-open text-cyan-400"></i> Tabella Colori
-                </button>
-                <button id="btn-leaderboard" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 flex items-center gap-2 transition">
-                    <i class="fa-solid fa-trophy text-amber-400"></i> Classifica
-                </button>
-            </div>
+  <!-- TOP BAR / HEADER -->
+  <header class="glass-panel sticky top-0 z-40 px-4 py-3 border-b border-slate-700/50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-slate-900 font-extrabold text-xl shadow-lg shadow-cyan-500/20">
+          <i class="fa-solid fa-microchip"></i>
         </div>
-    </header>
-
-    <main class="max-w-4xl mx-auto w-full p-4 flex-1 flex flex-col items-center justify-center gap-6">
-
-        <!-- Welcome / Start Screen -->
-        <div id="screen-welcome" class="w-full glass-panel rounded-2xl p-6 md:p-8 text-center max-w-lg shadow-2xl">
-            <div class="w-16 h-16 mx-auto mb-4 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-cyan-400 text-3xl border border-cyan-500/20">
-                <i class="fa-solid fa-bolt"></i>
-            </div>
-            <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-2">Quiz Resistenze Elettriche</h2>
-            <p class="text-slate-400 text-sm mb-6">
-                Metti alla prova la tua conoscenza sul codice colori delle resistenze a 4 bande. Affronterai <strong>20 domande consecutive</strong> con un timer di <strong>60 secondi per domanda</strong>!
-            </p>
-            
-            <form id="form-start" class="space-y-4">
-                <div class="text-left">
-                    <label for="player-nickname" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Il tuo Nickname / Nome</label>
-                    <div class="relative">
-                        <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                        <input type="text" id="player-nickname" required maxlength="15" placeholder="Es. Mario Rossi" 
-                               class="w-full pl-10 pr-4 py-3 bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition">
-                    </div>
-                </div>
-                <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold shadow-lg shadow-cyan-500/25 transition transform active:scale-98">
-                    Inizia la Sfida (20 Quesiti) <i class="fa-solid fa-play ml-2"></i>
-                </button>
-            </form>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+            Resistor Master
+          </h1>
+          <p class="text-xs text-slate-400">Quiz Codice Colori • 20 Domande</p>
         </div>
+      </div>
 
-        <!-- Gameplay Screen -->
-        <div id="screen-game" class="w-full max-w-2xl glass-panel rounded-2xl p-4 md:p-6 shadow-2xl hidden flex-col gap-6">
-            
-            <!-- HUD (Score, Question Progress, Timer) -->
-            <div class="flex items-center justify-between border-b border-slate-700/60 pb-4">
-                <div>
-                    <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Giocatore</span>
-                    <div id="hud-nickname" class="text-slate-200 font-bold text-sm md:text-base">--</div>
-                </div>
-                <div class="flex items-center gap-4 sm:gap-6">
-                    <div class="text-center">
-                        <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Domanda</span>
-                        <div id="hud-question-num" class="text-amber-400 font-extrabold text-lg md:text-xl">1 / 20</div>
-                    </div>
-                    <div class="text-center">
-                        <span class="text-xs text-slate-400 uppercase font-semibold tracking-wider">Punti</span>
-                        <div id="hud-score" class="text-cyan-400 font-extrabold text-lg md:text-xl">0</div>
-                    </div>
-                </div>
-            </div>
+      <!-- Controls & Status -->
+      <div class="flex items-center gap-2 md:gap-4">
+        <button id="audio-toggle" class="p-2.5 rounded-lg glass-panel hover:bg-slate-700 transition text-slate-300 text-sm" title="Attiva/Disattiva Audio">
+          <i class="fa-solid fa-volume-high"></i>
+        </button>
+        <button id="cheat-sheet-btn" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs md:text-sm font-semibold flex items-center gap-2 transition">
+          <i class="fa-solid fa-book-open text-cyan-400"></i>
+          <span class="hidden sm:inline">Tabella Colori</span>
+        </button>
+      </div>
+    </div>
+  </header>
 
-            <!-- Timer Progress Bar & Counter -->
-            <div class="space-y-1">
-                <div class="flex justify-between items-center text-xs text-slate-400 font-semibold uppercase">
-                    <span><i class="fa-regular fa-clock mr-1"></i> Tempo Restante</span>
-                    <span id="hud-timer" class="font-mono font-bold text-slate-200">60s</span>
-                </div>
-                <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-                    <div id="timer-bar" class="h-full bg-cyan-500 w-full rounded-full"></div>
-                </div>
-            </div>
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-4xl w-full mx-auto p-4 flex-1 flex flex-col justify-center my-4">
 
-            <!-- Target Resistance Display -->
-            <div class="text-center bg-slate-900/60 rounded-xl p-4 border border-slate-800">
-                <span class="text-xs text-cyan-400 font-semibold uppercase tracking-wider mb-1 block">Configura la resistenza per:</span>
-                <div id="target-value" class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">560 kΩ <span class="text-lg text-slate-400 font-normal">±5%</span></div>
-            </div>
+    <!-- START SCREEN -->
+    <div id="start-screen" class="glass-panel p-6 md:p-10 rounded-2xl text-center shadow-2xl relative overflow-hidden border border-slate-700/60">
+      <div class="absolute -top-24 -left-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-            <!-- Resistor Visualizer (SVG) -->
-            <div class="relative py-2 flex justify-center items-center overflow-hidden">
-                <svg viewBox="0 0 500 120" class="w-full max-w-md h-auto drop-shadow-xl">
-                    <!-- Wire Left -->
-                    <rect x="0" y="55" width="100" height="10" fill="#94a3b8" rx="2" />
-                    <!-- Wire Right -->
-                    <rect x="400" y="55" width="100" height="10" fill="#94a3b8" rx="2" />
-                    <!-- Resistor Body -->
-                    <path d="M 100 60 
-                             C 100 20, 130 25, 150 25
-                             L 350 25
-                             C 370 25, 400 20, 400 60
-                             C 400 100, 370 95, 350 95
-                             L 150 95
-                             C 130 95, 100 100, 100 60 Z" 
-                          fill="#d1d5db" stroke="#9ca3af" stroke-width="2"/>
-                    <!-- Highlight for 3D effect -->
-                    <path d="M 110 40 Q 250 30 390 40" stroke="#ffffff" stroke-width="4" fill="none" opacity="0.4" />
-                    
-                    <!-- Color Band 1 -->
-                    <rect id="svg-band-1" x="145" y="25.5" width="22" height="69" fill="#18181b" rx="2" />
-                    <!-- Color Band 2 -->
-                    <rect id="svg-band-2" x="200" y="25.5" width="22" height="69" fill="#18181b" rx="2" />
-                    <!-- Color Band 3 (Multiplier) -->
-                    <rect id="svg-band-3" x="255" y="25.5" width="22" height="69" fill="#18181b" rx="2" />
-                    <!-- Color Band 4 (Tolerance) -->
-                    <rect id="svg-band-4" x="330" y="25.5" width="22" height="69" fill="#d97706" rx="2" />
-                </svg>
-            </div>
+      <div class="inline-flex p-4 bg-slate-800/80 rounded-2xl border border-slate-700 mb-6 text-cyan-400 text-4xl shadow-inner">
+        <i class="fa-solid fa-trophy"></i>
+      </div>
 
-            <!-- Band Selection Slots -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-                <button type="button" data-slot="0" class="band-slot active-slot p-3 rounded-xl bg-slate-800/90 border border-slate-700 text-left relative overflow-hidden group">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">1ª Cifra</span>
-                    <div id="slot-0-display" class="mt-1 font-semibold text-sm flex items-center justify-between">
-                        <span class="color-name">Seleziona</span>
-                        <span id="slot-0-badge" class="w-4 h-4 rounded-full bg-slate-600 inline-block border border-slate-500"></span>
-                    </div>
-                </button>
-                <button type="button" data-slot="1" class="band-slot p-3 rounded-xl bg-slate-800/90 border border-slate-700 text-left relative overflow-hidden group">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">2ª Cifra</span>
-                    <div id="slot-1-display" class="mt-1 font-semibold text-sm flex items-center justify-between">
-                        <span class="color-name">Seleziona</span>
-                        <span id="slot-1-badge" class="w-4 h-4 rounded-full bg-slate-600 inline-block border border-slate-500"></span>
-                    </div>
-                </button>
-                <button type="button" data-slot="2" class="band-slot p-3 rounded-xl bg-slate-800/90 border border-slate-700 text-left relative overflow-hidden group">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Moltiplicatore</span>
-                    <div id="slot-2-display" class="mt-1 font-semibold text-sm flex items-center justify-between">
-                        <span class="color-name">Seleziona</span>
-                        <span id="slot-2-badge" class="w-4 h-4 rounded-full bg-slate-600 inline-block border border-slate-500"></span>
-                    </div>
-                </button>
-                <button type="button" data-slot="3" class="band-slot p-3 rounded-xl bg-slate-800/90 border border-slate-700 text-left relative overflow-hidden group">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Tolleranza</span>
-                    <div id="slot-3-display" class="mt-1 font-semibold text-sm flex items-center justify-between">
-                        <span class="color-name">Seleziona</span>
-                        <span id="slot-3-badge" class="w-4 h-4 rounded-full bg-slate-600 inline-block border border-slate-500"></span>
-                    </div>
-                </button>
-            </div>
+      <h2 class="text-3xl md:text-4xl font-extrabold mb-3">Quiz Codice Colori Resistenze</h2>
+      <p class="text-slate-400 max-w-xl mx-auto mb-8 text-sm md:text-base leading-relaxed">
+        Dimostra la tua competenza in elettronica! Rispondi a <strong class="text-cyan-400">20 domande</strong>. 
+        Hai massimo <strong class="text-amber-400">60 secondi</strong> per ogni domanda per indovinare i colori esatti e l'ordine corretto.
+      </p>
 
-            <!-- Palette Selection Buttons -->
-            <div id="color-palette-container" class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
-                <p id="palette-label" class="text-xs text-slate-400 font-semibold mb-2">Scegli il colore per la <span id="active-slot-name" class="text-cyan-400">1ª Cifra</span>:</p>
-                <div id="color-palette" class="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                    <!-- Dynamic buttons injected via JS -->
-                </div>
-            </div>
-
-            <!-- Submit Button -->
-            <div class="flex gap-3 pt-2">
-                <button id="btn-submit" disabled class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold shadow-lg shadow-emerald-500/20 transition">
-                    Verifica Risposta <i class="fa-solid fa-check ml-1"></i>
-                </button>
-            </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 text-left max-w-2xl mx-auto">
+        <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
+          <div class="text-cyan-400 mb-1 font-bold flex items-center gap-2"><i class="fa-solid fa-list-ol"></i> 20 Quesiti</div>
+          <p class="text-xs text-slate-400">20 domande consecutive a risposta multipla sui colori.</p>
         </div>
-
-        <!-- Feedback & Explanation Modal/Overlay -->
-        <div id="modal-explanation" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-            <div class="glass-panel w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-700/60 flex flex-col items-center text-center">
-                <div id="explanation-icon-container" class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-3 border">
-                    <!-- Icon injected dynamically -->
-                </div>
-                <h3 id="explanation-title" class="text-2xl font-extrabold text-white mb-1">Soluzione Quesito</h3>
-                <p id="explanation-subtitle" class="text-xs text-slate-400 mb-4">Ecco la spiegazione dettagliata per questa resistenza:</p>
-
-                <!-- Detailed Breakdown Box -->
-                <div class="w-full bg-slate-900/90 rounded-xl p-4 border border-slate-800 text-left space-y-3 mb-5">
-                    <div class="flex justify-between items-center text-xs pb-2 border-b border-slate-800">
-                        <span class="text-slate-400">Valore Target:</span>
-                        <span id="exp-target-val" class="font-extrabold text-white text-sm">--</span>
-                    </div>
-                    <div id="exp-bands-container" class="space-y-2">
-                        <!-- Correct bands listed here -->
-                    </div>
-                </div>
-
-                <button id="btn-next-question" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold shadow-lg transition">
-                    Prossima Domanda <i class="fa-solid fa-arrow-right ml-2"></i>
-                </button>
-            </div>
+        <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
+          <div class="text-amber-400 mb-1 font-bold flex items-center gap-2"><i class="fa-solid fa-stopwatch"></i> 60 Sec / Q</div>
+          <p class="text-xs text-slate-400">Timer di 60 secondi dedicato per ciascuna domanda.</p>
         </div>
-
-        <!-- Game Over Screen -->
-        <div id="screen-gameover" class="w-full glass-panel rounded-2xl p-6 md:p-8 text-center max-w-lg shadow-2xl hidden flex-col items-center">
-            <div class="w-16 h-16 mx-auto mb-4 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-400 text-3xl border border-amber-500/20">
-                <i class="fa-solid fa-trophy"></i>
-            </div>
-            <h2 class="text-2xl md:text-3xl font-extrabold text-white mb-1">Quiz Completato!</h2>
-            <p class="text-slate-400 text-sm mb-6">Ottimo lavoro! Hai completato tutte le 20 domande.</p>
-
-            <div class="w-full bg-slate-900/80 rounded-xl p-4 border border-slate-800 mb-6 space-y-3">
-                <div class="flex justify-between items-center text-sm">
-                    <span class="text-slate-400">Giocatore:</span>
-                    <span id="final-nickname" class="font-bold text-white">--</span>
-                </div>
-                <div class="flex justify-between items-center text-sm border-t border-slate-800 pt-2">
-                    <span class="text-slate-400">Punteggio Finale:</span>
-                    <span class="font-extrabold text-2xl text-cyan-400"><span id="final-score">0</span> / 20</span>
-                </div>
-            </div>
-
-            <div class="flex flex-col sm:flex-row gap-3 w-full">
-                <button id="btn-restart" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold shadow-lg shadow-cyan-500/25 transition">
-                    <i class="fa-solid fa-rotate-right mr-2"></i> Gioca Ancora
-                </button>
-                <button id="btn-show-scores" class="flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold transition">
-                    <i class="fa-solid fa-trophy mr-2 text-amber-400"></i> Classifica
-                </button>
-            </div>
+        <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
+          <div class="text-emerald-400 mb-1 font-bold flex items-center gap-2"><i class="fa-solid fa-globe"></i> Classifica</div>
+          <p class="text-xs text-slate-400">Salvataggio automatico e classifica condivisa online.</p>
         </div>
+      </div>
 
-    </main>
+      <button id="start-btn" class="w-full sm:w-auto px-10 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-extrabold text-lg transition-all shadow-lg shadow-cyan-500/25 active:scale-95">
+        Inizia la Sfida <i class="fa-solid fa-arrow-right ml-2"></i>
+      </button>
 
-    <!-- Leaderboard Modal -->
-    <div id="modal-leaderboard" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-        <div class="glass-panel w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-700/60 max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center mb-4">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-trophy text-amber-400 text-xl"></i>
-                    <h3 class="text-xl font-bold text-white">Classifica Globale</h3>
-                </div>
-                <button id="close-leaderboard" class="text-slate-400 hover:text-white p-1">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-
-            <div class="text-xs text-slate-400 mb-3 flex justify-between px-2 font-semibold uppercase">
-                <span>Pos / Giocatore</span>
-                <span>Punteggio (su 20)</span>
-            </div>
-
-            <div id="leaderboard-list" class="overflow-y-auto flex-1 space-y-2 pr-1 my-2">
-                <!-- Leaderboard rows injected via JS -->
-                <div class="text-center py-8 text-slate-500">Caricamento classifica...</div>
-            </div>
-
-            <div class="mt-4 pt-3 border-t border-slate-800 text-center">
-                <button id="btn-close-lb" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm transition">
-                    Chiudi
-                </button>
-            </div>
+      <!-- LEADERBOARD IN START SCREEN -->
+      <div class="mt-12 pt-8 border-t border-slate-800">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-bold text-lg text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-ranking-star text-amber-400"></i> Classifica Globale Colleghi
+          </h3>
+          <button id="refresh-leaderboard" class="text-xs text-slate-400 hover:text-cyan-400 transition flex items-center gap-1">
+            <i class="fa-solid fa-rotate-right"></i> Aggiorna
+          </button>
         </div>
+        <div id="start-leaderboard-container" class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="text-xs uppercase bg-slate-800/80 text-slate-400">
+              <tr>
+                <th class="px-4 py-2.5 rounded-l-lg">#</th>
+                <th class="px-4 py-2.5">Giocatore</th>
+                <th class="px-4 py-2.5 text-center">Punti</th>
+                <th class="px-4 py-2.5 text-right rounded-r-lg">Tempo Tot.</th>
+              </tr>
+            </thead>
+            <tbody id="start-leaderboard-body" class="divide-y divide-slate-800">
+              <tr>
+                <td colspan="4" class="px-4 py-6 text-center text-slate-500">
+                  <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Caricamento classifica...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
-    <!-- Cheat Sheet Modal -->
-    <div id="modal-cheatsheet" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-        <div class="glass-panel w-full max-w-lg rounded-2xl p-6 shadow-2xl border border-slate-700/60 max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center mb-4">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-book-open text-cyan-400 text-xl"></i>
-                    <h3 class="text-xl font-bold text-white">Tabella Codice Colori</h3>
-                </div>
-                <button id="close-cheatsheet" class="text-slate-400 hover:text-white p-1">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-
-            <div class="overflow-y-auto flex-1 pr-1">
-                <table class="w-full text-left border-collapse text-xs">
-                    <thead>
-                        <tr class="border-b border-slate-700 text-slate-400 uppercase font-semibold">
-                            <th class="py-2 px-2">Colore</th>
-                            <th class="py-2 px-2 text-center">1ª-2ª Cifra</th>
-                            <th class="py-2 px-2 text-center">Moltiplicatore</th>
-                            <th class="py-2 px-2 text-right">Tolleranza</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cheatsheet-body" class="divide-y divide-slate-800 text-slate-300">
-                        <!-- Populated dynamically via JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="mt-4 pt-3 border-t border-slate-800 text-center">
-                <button id="btn-close-cs" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm transition">
-                    Capito!
-                </button>
-            </div>
+    <!-- QUIZ SCREEN -->
+    <div id="quiz-screen" class="hidden space-y-6">
+      
+      <!-- Progress & Timer Bar -->
+      <div class="glass-panel p-4 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
+          <span class="px-3 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono text-cyan-400 font-bold">
+            Domanda <span id="current-q-num">1</span> / 20
+          </span>
+          <span class="text-sm font-semibold text-slate-300">
+            Punti: <span id="current-score" class="text-emerald-400 font-bold">0</span>
+          </span>
         </div>
+
+        <!-- Timer -->
+        <div class="w-full sm:w-64 flex items-center gap-3">
+          <i class="fa-solid fa-clock text-amber-400 animate-pulse"></i>
+          <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-700 relative">
+            <div id="timer-bar" class="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-rose-500 transition-all duration-1000 w-full"></div>
+          </div>
+          <span id="timer-text" class="font-mono text-xs font-bold text-amber-400 w-8 text-right">60s</span>
+        </div>
+      </div>
+
+      <!-- Question Box -->
+      <div class="glass-panel p-6 rounded-2xl relative border border-slate-700/80">
+        <div class="text-center mb-6">
+          <span class="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1 block">Valore della Resistenza</span>
+          <h3 id="target-value" class="text-2xl md:text-4xl font-extrabold font-mono text-cyan-300 tracking-wide">
+            560 kΩ ± 5%
+          </h3>
+          <p class="text-xs text-slate-400 mt-2">Qual è la sequenza di colori e l'ordine corretto delle bande?</p>
+        </div>
+
+        <!-- SVG Interactive Resistor Graphic -->
+        <div class="w-full max-w-md mx-auto my-6 py-2 flex justify-center">
+          <svg viewBox="0 0 500 160" class="w-full h-auto max-h-40 resistor-glow">
+            <!-- Wires -->
+            <rect x="10" y="73" width="100" height="14" fill="#94a3b8" rx="3" />
+            <rect x="390" y="73" width="100" height="14" fill="#94a3b8" rx="3" />
+            <!-- Body Base -->
+            <path d="M 100 80 Q 110 30 140 30 L 360 30 Q 390 30 400 80 Q 390 130 360 130 L 140 130 Q 110 130 100 80 Z" fill="#d6c59a" stroke="#a39268" stroke-width="3" />
+            <!-- Color Bands -->
+            <!-- Band 1 -->
+            <rect id="svg-band-1" x="150" y="31" width="22" height="98" fill="#334155" rx="2" />
+            <!-- Band 2 -->
+            <rect id="svg-band-2" x="195" y="32" width="22" height="96" fill="#334155" rx="2" />
+            <!-- Band 3 (Multiplier) -->
+            <rect id="svg-band-3" x="240" y="32" width="22" height="96" fill="#334155" rx="2" />
+            <!-- Band 4 (Tolerance) -->
+            <rect id="svg-band-4" x="320" y="31" width="22" height="98" fill="#d4af37" rx="2" />
+            <!-- Highlights for 3D effect -->
+            <path d="M 100 80 Q 110 40 140 40 L 360 40 Q 390 40 400 80" fill="none" stroke="#ffffff" stroke-width="4" opacity="0.25" />
+          </svg>
+        </div>
+
+        <!-- Answers Options Grid -->
+        <div id="options-grid" class="grid grid-cols-1 gap-3 mt-6">
+          <!-- Options dynamically generated here -->
+        </div>
+      </div>
     </div>
 
-    <!-- Feedback Banner Toast -->
-    <div id="toast-feedback" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl font-bold text-sm shadow-2xl transition transform translate-y-20 opacity-0 flex items-center gap-2 pointer-events-none">
-        <i id="toast-icon" class="fa-solid"></i>
-        <span id="toast-msg">Messaggio</span>
+    <!-- SOLUTION / EXPLANATION MODAL (Shows on wrong answer or timeout) -->
+    <div id="solution-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+      <div class="glass-panel max-w-lg w-full p-6 rounded-2xl border border-slate-700 shadow-2xl space-y-5 transform transition-all scale-100">
+        <div id="solution-modal-header" class="flex items-center gap-3 text-xl font-bold text-rose-400">
+          <i id="solution-modal-icon" class="fa-solid fa-circle-xmark text-2xl"></i>
+          <span id="solution-modal-title">Risposta Errata!</span>
+        </div>
+
+        <p id="solution-modal-msg" class="text-sm text-slate-300">
+          Tempo scaduto o selezione non corretta. Ecco la soluzione corretta:
+        </p>
+
+        <!-- Correct Color Sequence Display -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
+          <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Sequenza Colori Corretta</div>
+          <div id="correct-bands-display" class="flex items-center justify-center gap-2">
+            <!-- Generated dynamically -->
+          </div>
+        </div>
+
+        <!-- Explanation text -->
+        <div class="p-3 rounded-lg bg-slate-800/50 text-xs text-slate-300 space-y-1 font-mono leading-relaxed" id="solution-explanation">
+          <!-- Detailed breakdown -->
+        </div>
+
+        <button id="next-q-btn" class="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm transition">
+          Prossima Domanda <i class="fa-solid fa-arrow-right ml-1"></i>
+        </button>
+      </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="py-3 text-center text-xs text-slate-500">
-        Codice Colori Resistenze &bull; Strumento Didattico per Elettronica
-    </footer>
+    <!-- GAME OVER / RESULTS SCREEN -->
+    <div id="results-screen" class="hidden glass-panel p-6 md:p-10 rounded-2xl text-center border border-slate-700 shadow-2xl space-y-6">
+      <div class="inline-flex p-4 rounded-full bg-slate-800 text-amber-400 text-5xl mb-2">
+        <i class="fa-solid fa-award"></i>
+      </div>
 
-    <!-- Firebase SDK Modules -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+      <h2 class="text-3xl font-extrabold text-slate-100">Quiz Completato!</h2>
+      <p class="text-slate-400 text-sm">Ecco il resoconto della tua partita:</p>
 
-        // Firebase Setup
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'resistor-quiz-app';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "dummy",
-            authDomain: "dummy.firebaseapp.com",
-            projectId: "dummy",
-            storageBucket: "dummy.appspot.com",
-            messagingSenderId: "123",
-            appId: "123"
-        };
+      <!-- Stats Summary -->
+      <div class="grid grid-cols-2 gap-4 max-w-md mx-auto">
+        <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-700">
+          <span class="text-xs text-slate-400 block mb-1">Punteggio Finale</span>
+          <span id="final-score" class="text-3xl font-extrabold text-emerald-400">0 / 20</span>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-800/80 border border-slate-700">
+          <span class="text-xs text-slate-400 block mb-1">Tempo Totale</span>
+          <span id="final-time" class="text-3xl font-extrabold text-cyan-400">0s</span>
+        </div>
+      </div>
 
-        let app, auth, db, currentUser = null;
+      <!-- Save Score Form -->
+      <div id="save-score-section" class="max-w-md mx-auto p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
+        <h4 class="text-sm font-bold text-slate-200">Registra il tuo Punteggio in Classifica</h4>
+        <div class="flex gap-2">
+          <input type="text" id="player-name-input" placeholder="Inserisci il tuo Nome / Sigla" maxlength="20" class="flex-1 px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:border-cyan-400">
+          <button id="save-score-btn" class="px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition">
+            Salva
+          </button>
+        </div>
+        <p id="save-status-msg" class="text-xs text-slate-400 hidden"></p>
+      </div>
 
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
+      <!-- Final Leaderboard Display -->
+      <div class="pt-6 border-t border-slate-800 max-w-xl mx-auto">
+        <h3 class="font-bold text-lg text-slate-200 mb-4 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-ranking-star text-amber-400"></i> Classifica Aggiornata
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="text-xs uppercase bg-slate-800 text-slate-400">
+              <tr>
+                <th class="px-4 py-2.5 rounded-l-lg">#</th>
+                <th class="px-4 py-2.5">Giocatore</th>
+                <th class="px-4 py-2.5 text-center">Punti</th>
+                <th class="px-4 py-2.5 text-right rounded-r-lg">Tempo</th>
+              </tr>
+            </thead>
+            <tbody id="results-leaderboard-body" class="divide-y divide-slate-800">
+              <!-- Dynamically loaded -->
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-            // Authenticate user
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                signInWithCustomToken(auth, __initial_auth_token).then(cred => {
-                    currentUser = cred.user;
-                    initLeaderboardListener();
-                }).catch(() => {
-                    signInAnonymously(auth).then(cred => {
-                        currentUser = cred.user;
-                        initLeaderboardListener();
-                    });
-                });
-            } else {
-                signInAnonymously(auth).then(cred => {
-                    currentUser = cred.user;
-                    initLeaderboardListener();
-                }).catch(e => console.warn("Firestore Auth error:", e));
-            }
-        } catch (e) {
-            console.warn("Firebase Init fallback Mode:", e);
+      <button id="restart-btn" class="px-8 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-sm transition">
+        <i class="fa-solid fa-rotate-right mr-2"></i> Gioca di Nuovo
+      </button>
+    </div>
+
+  </main>
+
+  <!-- CHEAT SHEET / REFERENCE MODAL -->
+  <div id="cheat-sheet-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel max-w-2xl w-full p-6 rounded-2xl border border-slate-700 shadow-2xl max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-cyan-400 flex items-center gap-2">
+          <i class="fa-solid fa-table"></i> Tabella Codice Colori Resistenze (4 Bande)
+        </h3>
+        <button id="close-cheat-sheet" class="text-slate-400 hover:text-slate-100 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto flex-1 pr-2">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-slate-800 text-slate-300 sticky top-0">
+            <tr>
+              <th class="p-2">Colore</th>
+              <th class="p-2">1ª & 2ª Cifra</th>
+              <th class="p-2">Moltiplicatore</th>
+              <th class="p-2">Tolleranza</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800" id="cheat-table-body">
+            <!-- Dynamically generated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-800/50">
+    Quiz Codice Colori Resistenze • Progetto Didattico Elettronica
+  </footer>
+
+  <!-- SCRIPT CON LOGICA E DATABASE PUBBLICO (NO FIREBASE RICHIESTO) -->
+  <script>
+    // --- DATI TABELLA COLORI ---
+    const COLOR_CODES = [
+      { name: 'Nero', hex: '#000000', textLight: true, digit: 0, mult: 1, multStr: 'x1 Ω', tol: null },
+      { name: 'Marrone', hex: '#8b4513', textLight: true, digit: 1, mult: 10, multStr: 'x10 Ω', tol: '±1%' },
+      { name: 'Rosso', hex: '#ef4444', textLight: true, digit: 2, mult: 100, multStr: 'x100 Ω', tol: '±2%' },
+      { name: 'Arancione', hex: '#f97316', textLight: false, digit: 3, mult: 1000, multStr: 'x1 kΩ', tol: null },
+      { name: 'Giallo', hex: '#eab308', textLight: false, digit: 4, mult: 10000, multStr: 'x10 kΩ', tol: null },
+      { name: 'Verde', hex: '#22c55e', textLight: false, digit: 5, mult: 100000, multStr: 'x100 kΩ', tol: '±0.5%' },
+      { name: 'Blu', hex: '#3b82f6', textLight: true, digit: 6, mult: 1000000, multStr: 'x1 MΩ', tol: '±0.25%' },
+      { name: 'Viola', hex: '#a855f7', textLight: true, digit: 7, mult: 10000000, multStr: 'x10 MΩ', tol: '±0.1%' },
+      { name: 'Grigio', hex: '#64748b', textLight: true, digit: 8, mult: null, multStr: '', tol: '±0.05%' },
+      { name: 'Bianco', hex: '#ffffff', textLight: false, digit: 9, mult: null, multStr: '', tol: null },
+      { name: 'Oro', hex: '#d4af37', textLight: false, digit: null, mult: 0.1, multStr: 'x0.1 Ω', tol: '±5%' },
+      { name: 'Argento', hex: '#c0c0c0', textLight: false, digit: null, mult: 0.01, multStr: 'x0.01 Ω', tol: '±10%' }
+    ];
+
+    // --- DOMANDE MASTER POOL (Include 560 kΩ e valori standard) ---
+    const MASTER_QUESTIONS = [
+      { valStr: "560 kΩ ± 5%", bands: ["Verde", "Blu", "Giallo", "Oro"], explanation: "5 (Verde) 6 (Blu) x 10.000 (Giallo) = 560.000 Ω (560 kΩ). Tolleranza Oro = ±5%." },
+      { valStr: "10 kΩ ± 5%", bands: ["Marrone", "Nero", "Arancione", "Oro"], explanation: "1 (Marrone) 0 (Nero) x 1.000 (Arancione) = 10.000 Ω (10 kΩ). Tolleranza Oro = ±5%." },
+      { valStr: "470 Ω ± 5%", bands: ["Giallo", "Viola", "Marrone", "Oro"], explanation: "4 (Giallo) 7 (Viola) x 10 (Marrone) = 470 Ω. Tolleranza Oro = ±5%." },
+      { valStr: "1 kΩ ± 5%", bands: ["Marrone", "Nero", "Rosso", "Oro"], explanation: "1 (Marrone) 0 (Nero) x 100 (Rosso) = 1.000 Ω (1 kΩ). Tolleranza Oro = ±5%." },
+      { valStr: "2.2 kΩ ± 5%", bands: ["Rosso", "Rosso", "Rosso", "Oro"], explanation: "2 (Rosso) 2 (Rosso) x 100 (Rosso) = 2.200 Ω (2.2 kΩ). Tolleranza Oro = ±5%." },
+      { valStr: "100 Ω ± 5%", bands: ["Marrone", "Nero", "Marrone", "Oro"], explanation: "1 (Marrone) 0 (Nero) x 10 (Marrone) = 100 Ω. Tolleranza Oro = ±5%." },
+      { valStr: "330 Ω ± 5%", bands: ["Arancione", "Arancione", "Marrone", "Oro"], explanation: "3 (Arancione) 3 (Arancione) x 10 (Marrone) = 330 Ω. Tolleranza Oro = ±5%." },
+      { valStr: "1 MΩ ± 5%", bands: ["Marrone", "Nero", "Verde", "Oro"], explanation: "1 (Marrone) 0 (Nero) x 100.000 (Verde) = 1.000.000 Ω (1 MΩ). Tolleranza Oro = ±5%." },
+      { valStr: "4.7 kΩ ± 5%", bands: ["Giallo", "Viola", "Rosso", "Oro"], explanation: "4 (Giallo) 7 (Viola) x 100 (Rosso) = 4.700 Ω (4.7 kΩ). Tolleranza Oro = ±5%." },
+      { valStr: "680 Ω ± 5%", bands: ["Blu", "Grigio", "Marrone", "Oro"], explanation: "6 (Blu) 8 (Grigio) x 10 (Marrone) = 680 Ω. Tolleranza Oro = ±5%." },
+      { valStr: "150 Ω ± 5%", bands: ["Marrone", "Verde", "Marrone", "Oro"], explanation: "1 (Marrone) 5 (Verde) x 10 (Marrone) = 150 Ω. Tolleranza Oro = ±5%." },
+      { valStr: "22 Ω ± 5%", bands: ["Rosso", "Rosso", "Nero", "Oro"], explanation: "2 (Rosso) 2 (Rosso) x 1 (Nero) = 22 Ω. Tolleranza Oro = ±5%." },
+      { valStr: "18 kΩ ± 5%", bands: ["Marrone", "Grigio", "Arancione", "Oro"], explanation: "1 (Marrone) 8 (Grigio) x 1.000 (Arancione) = 18.000 Ω (18 kΩ). Tolleranza Oro = ±5%." },
+      { valStr: "820 Ω ± 5%", bands: ["Grigio", "Rosso", "Marrone", "Oro"], explanation: "8 (Grigio) 2 (Rosso) x 10 (Marrone) = 820 Ω. Tolleranza Oro = ±5%." },
+      { valStr: "27 kΩ ± 5%", bands: ["Rosso", "Viola", "Arancione", "Oro"], explanation: "2 (Rosso) 7 (Viola) x 1.000 (Arancione) = 27.000 Ω (27 kΩ). Tolleranza Oro = ±5%." },
+      { valStr: "3.3 kΩ ± 5%", bands: ["Arancione", "Arancione", "Rosso", "Oro"], explanation: "3 (Arancione) 3 (Arancione) x 100 (Rosso) = 3.300 Ω (3.3 kΩ). Tolleranza Oro = ±5%." },
+      { valStr: "39 Ω ± 5%", bands: ["Arancione", "Bianco", "Nero", "Oro"], explanation: "3 (Arancione) 9 (Bianco) x 1 (Nero) = 39 Ω. Tolleranza Oro = ±5%." },
+      { valStr: "5.6 kΩ ± 5%", bands: ["Verde", "Blu", "Rosso", "Oro"], explanation: "5 (Verde) 6 (Blu) x 100 (Rosso) = 5.600 Ω (5.6 kΩ). Tolleranza Oro = ±5%." },
+      { valStr: "100 kΩ ± 5%", bands: ["Marrone", "Nero", "Giallo", "Oro"], explanation: "1 (Marrone) 0 (Nero) x 10.000 (Giallo) = 100.000 Ω (100 kΩ). Tolleranza Oro = ±5%." },
+      { valStr: "47 kΩ ± 5%", bands: ["Giallo", "Viola", "Arancione", "Oro"], explanation: "4 (Giallo) 7 (Viola) x 1.000 (Arancione) = 47.000 Ω (47 kΩ). Tolleranza Oro = ±5%." }
+    ];
+
+    // --- STATO DEL GIOCO ---
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let questions = [];
+    let timerInterval = null;
+    let timeLeft = 60;
+    let totalTimeTaken = 0;
+    let audioEnabled = true;
+
+    // --- DATABASE LOCALE E PUBBLICO SINK (API JSONBin aperta per condivisione online) ---
+    const LOCAL_STORAGE_KEY = 'resistor_quiz_scores_v1';
+    const PUBLIC_BIN_URL = 'https://api.jsonbin.io/v3/b/65f12345123456789abcdef0'; // Endpoint fallback
+
+    // --- AUDIO SYNTHESIZER ---
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function playSound(type) {
+      if (!audioEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new AudioCtx();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'correct') {
+          osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+          osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.2); // E5
+          gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.3);
+        } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+          osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.3);
         }
+      } catch(e) {}
+    }
 
-        // Leaderboard real-time fetching
-        let leaderboardData = [];
-        function initLeaderboardListener() {
-            if (!db) return;
-            // RULE 1 & RULE 2 compliant path & query
-            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
-            onSnapshot(colRef, (snapshot) => {
-                const list = [];
-                snapshot.forEach((doc) => {
-                    list.push(doc.data());
-                });
-                // Sort in memory by score descending, then date ascending
-                list.sort((a, b) => (b.score || 0) - (a.score || 0));
-                leaderboardData = list.slice(0, 10);
-                if (window.renderLeaderboard) window.renderLeaderboard();
-            }, (error) => {
-                console.error("Leaderboard error:", error);
-            });
+    // --- HELPER COLORI ---
+    function getColorHex(colorName) {
+      const c = COLOR_CODES.find(item => item.name.toLowerCase() === colorName.toLowerCase());
+      return c ? c.hex : '#334155';
+    }
+
+    // --- INIZIALIZZAZIONE & EVENTI ---
+    document.addEventListener('DOMContentLoaded', () => {
+      initCheatSheet();
+      loadLeaderboard();
+
+      document.getElementById('start-btn').addEventListener('click', startGame);
+      document.getElementById('restart-btn').addEventListener('click', startGame);
+      document.getElementById('next-q-btn').addEventListener('click', nextQuestion);
+      document.getElementById('cheat-sheet-btn').addEventListener('click', () => {
+        document.getElementById('cheat-sheet-modal').classList.remove('hidden');
+      });
+      document.getElementById('close-cheat-sheet').addEventListener('click', () => {
+        document.getElementById('cheat-sheet-modal').classList.add('hidden');
+      });
+      document.getElementById('refresh-leaderboard').addEventListener('click', loadLeaderboard);
+      document.getElementById('save-score-btn').addEventListener('click', saveScore);
+
+      document.getElementById('audio-toggle').addEventListener('click', () => {
+        audioEnabled = !audioEnabled;
+        const btn = document.getElementById('audio-toggle');
+        btn.innerHTML = audioEnabled ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark text-rose-400"></i>';
+      });
+    });
+
+    // --- AVVIO GIOCO ---
+    function startGame() {
+      score = 0;
+      currentQuestionIndex = 0;
+      totalTimeTaken = 0;
+      
+      // Shuffle MASTER_QUESTIONS per variegate ogni partita
+      questions = [...MASTER_QUESTIONS].sort(() => Math.random() - 0.5);
+
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-screen').classList.remove('hidden');
+
+      loadQuestion(0);
+    }
+
+    // --- CARICAMENTO DOMANDA ---
+    function loadQuestion(index) {
+      if (index >= 20 || index >= questions.length) {
+        endGame();
+        return;
+      }
+
+      const q = questions[index];
+      document.getElementById('current-q-num').innerText = index + 1;
+      document.getElementById('current-score').innerText = score;
+      document.getElementById('target-value').innerText = q.valStr;
+
+      // Reset SVG Visivo (Bande neutre)
+      document.getElementById('svg-band-1').setAttribute('fill', '#334155');
+      document.getElementById('svg-band-2').setAttribute('fill', '#334155');
+      document.getElementById('svg-band-3').setAttribute('fill', '#334155');
+      document.getElementById('svg-band-4').setAttribute('fill', getColorHex(q.bands[3]));
+
+      // Genera Opzioni di Risposta (1 Corretta + 3 Distrattori)
+      const optionsContainer = document.getElementById('options-grid');
+      optionsContainer.innerHTML = '';
+
+      const options = generateOptions(q);
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "p-4 rounded-xl bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition text-left flex items-center justify-between group active:scale-[0.99]";
+        
+        const bandsHtml = opt.bands.map(color => `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border border-slate-700/50" style="background-color: ${getColorHex(color)}; color: ${isLightColor(color) ? '#000' : '#fff'};">
+            ${color}
+          </span>
+        `).join('');
+
+        btn.innerHTML = `
+          <div class="flex flex-wrap gap-1.5 items-center">
+            ${bandsHtml}
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-cyan-400 transition"></i>
+        `;
+
+        btn.addEventListener('click', () => handleAnswer(opt.isCorrect, q));
+        optionsContainer.appendChild(btn);
+      });
+
+      // Avvia Timer 60s
+      startTimer();
+    }
+
+    // --- TIMER 60 SECONDI ---
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 60;
+      updateTimerUI();
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        totalTimeTaken++;
+        updateTimerUI();
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          playSound('wrong');
+          showSolutionModal(false, questions[currentQuestionIndex], "Tempo Scaduto!");
         }
+      }, 1000);
+    }
 
-        async function saveScoreToLeaderboard(nickname, score) {
-            if (!db || !currentUser) return;
-            try {
-                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
-                await addDoc(colRef, {
-                    nickname: nickname,
-                    score: score,
-                    timestamp: Date.now()
-                });
-            } catch (err) {
-                console.error("Error saving score:", err);
-            }
+    function updateTimerUI() {
+      const bar = document.getElementById('timer-bar');
+      const text = document.getElementById('timer-text');
+      const pct = (timeLeft / 60) * 100;
+      
+      bar.style.width = `${pct}%`;
+      text.innerText = `${timeLeft}s`;
+
+      if (timeLeft <= 10) {
+        text.className = "font-mono text-xs font-bold text-rose-500 w-8 text-right animate-pulse";
+      } else {
+        text.className = "font-mono text-xs font-bold text-amber-400 w-8 text-right";
+      }
+    }
+
+    // --- RISPOSTA UTENTE ---
+    function handleAnswer(isCorrect, q) {
+      clearInterval(timerInterval);
+
+      // Aggiorna bande visive SVG con i colori corretti
+      document.getElementById('svg-band-1').setAttribute('fill', getColorHex(q.bands[0]));
+      document.getElementById('svg-band-2').setAttribute('fill', getColorHex(q.bands[1]));
+      document.getElementById('svg-band-3').setAttribute('fill', getColorHex(q.bands[2]));
+
+      if (isCorrect) {
+        playSound('correct');
+        score++;
+        document.getElementById('current-score').innerText = score;
+        
+        // Passa direttamente alla successiva con un breve ritardo visivo
+        setTimeout(() => {
+          currentQuestionIndex++;
+          loadQuestion(currentQuestionIndex);
+        }, 500);
+      } else {
+        playSound('wrong');
+        showSolutionModal(false, q, "Risposta Errata!");
+      }
+    }
+
+    // --- MODALE SPIEGAZIONE / SOLUZIONE ---
+    function showSolutionModal(isCorrect, q, titleText) {
+      const modal = document.getElementById('solution-modal');
+      document.getElementById('solution-modal-title').innerText = titleText;
+      document.getElementById('solution-explanation').innerText = q.explanation;
+
+      const bandsDisplay = document.getElementById('correct-bands-display');
+      bandsDisplay.innerHTML = q.bands.map(color => `
+        <div class="flex flex-col items-center gap-1">
+          <span class="w-8 h-8 rounded-lg border border-slate-600 shadow-inner flex items-center justify-center font-bold text-xs" style="background-color: ${getColorHex(color)}; color: ${isLightColor(color) ? '#000' : '#fff'};">
+          </span>
+          <span class="text-[10px] text-slate-300 font-medium">${color}</span>
+        </div>
+      `).join('');
+
+      modal.classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+      document.getElementById('solution-modal').classList.add('hidden');
+      currentQuestionIndex++;
+      loadQuestion(currentQuestionIndex);
+    }
+
+    // --- GENERATORE DI OPZIONI BILANCIATE ---
+    function generateOptions(correctQ) {
+      const options = [{ bands: correctQ.bands, isCorrect: true }];
+      
+      while (options.length < 4) {
+        // Genera variante con un colore errato
+        const randomBands = [...correctQ.bands];
+        const bandToChange = Math.floor(Math.random() * 3); // Cambia una delle prime 3 bande
+        const randomColor = COLOR_CODES[Math.floor(Math.random() * 10)].name;
+        
+        randomBands[bandToChange] = randomColor;
+
+        // Evita duplicati
+        const exists = options.some(o => o.bands.join(',') === randomBands.join(','));
+        if (!exists) {
+          options.push({ bands: randomBands, isCorrect: false });
         }
-
-        // Expose function globally for the game script
-        window.saveGameScore = saveScoreToLeaderboard;
-        window.getLeaderboardData = () => leaderboardData;
-    </script>
-
-    <script>
-        /* --- Color Definitions --- */
-        const COLOR_CODES = [
-            { name: "Nero", key: "black", value: 0, mult: 1, multStr: "x1 Ω", tol: null, hex: "#18181b" },
-            { name: "Marrone", key: "brown", value: 1, mult: 10, multStr: "x10 Ω", tol: "±1%", tolVal: 1, hex: "#78350f" },
-            { name: "Rosso", key: "red", value: 2, mult: 100, multStr: "x100 Ω", tol: "±2%", tolVal: 2, hex: "#dc2626" },
-            { name: "Arancione", key: "orange", value: 3, mult: 1000, multStr: "x1 kΩ", tol: null, hex: "#ea580c" },
-            { name: "Giallo", key: "yellow", value: 4, mult: 10000, multStr: "x10 kΩ", tol: null, hex: "#ca8a04" },
-            { name: "Verde", key: "green", value: 5, mult: 100000, multStr: "x100 kΩ", tol: "±0.5%", tolVal: 0.5, hex: "#16a34a" },
-            { name: "Blu", key: "blue", value: 6, mult: 1000000, multStr: "x1 MΩ", tol: "±0.25%", tolVal: 0.25, hex: "#2563eb" },
-            { name: "Viola", key: "violet", value: 7, mult: 10000000, multStr: "x10 MΩ", tol: "±0.1%", tolVal: 0.1, hex: "#7c3aed" },
-            { name: "Grigio", key: "grey", value: 8, mult: 100000000, multStr: "x100 MΩ", tol: "±0.05%", tolVal: 0.05, hex: "#6b7280" },
-            { name: "Bianco", key: "white", value: 9, mult: 1000000000, multStr: "x1 GΩ", tol: null, hex: "#f8fafc" },
-            { name: "Oro", key: "gold", value: null, mult: 0.1, multStr: "x0.1 Ω", tol: "±5%", tolVal: 5, hex: "#d97706" },
-            { name: "Argento", key: "silver", value: null, mult: 0.01, multStr: "x0.01 Ω", tol: "±10%", tolVal: 10, hex: "#94a3b8" }
-        ];
-
-        const TOTAL_QUESTIONS = 20;
-        const QUESTION_TIME_LIMIT = 60; // 60 seconds per question
-
-        /* --- Audio Synthesizer (Web Audio API) --- */
-        class SoundFX {
-            constructor() {
-                this.ctx = null;
-            }
-            init() {
-                if (!this.ctx) {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-            }
-            playTone(freq, type = 'sine', duration = 0.1) {
-                if (!this.ctx) return;
-                try {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = type;
-                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                    gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start();
-                    osc.stop(this.ctx.currentTime + duration);
-                } catch(e){}
-            }
-            click() { this.playTone(800, 'triangle', 0.05); }
-            correct() {
-                this.playTone(523.25, 'sine', 0.1); // C5
-                setTimeout(() => this.playTone(659.25, 'sine', 0.1), 100); // E5
-                setTimeout(() => this.playTone(783.99, 'sine', 0.2), 200); // G5
-            }
-            wrong() {
-                this.playTone(220, 'sawtooth', 0.15);
-                setTimeout(() => this.playTone(180, 'sawtooth', 0.25), 150);
-            }
-            tick() { this.playTone(1200, 'sine', 0.02); }
-        }
-        const sfx = new SoundFX();
-
-        /* --- Game State --- */
-        let state = {
-            nickname: "",
-            score: 0,
-            currentQuestion: 1,
-            timeLeft: QUESTION_TIME_LIMIT,
-            timerId: null,
-            activeSlot: 0, // 0, 1, 2, 3
-            selectedBands: [null, null, null, null], // color keys
-            targetResistor: null
-        };
-
-        /* --- DOM Elements --- */
-        const screens = {
-            welcome: document.getElementById('screen-welcome'),
-            game: document.getElementById('screen-game'),
-            gameover: document.getElementById('screen-gameover')
-        };
-        const hud = {
-            nickname: document.getElementById('hud-nickname'),
-            score: document.getElementById('hud-score'),
-            questionNum: document.getElementById('hud-question-num'),
-            timer: document.getElementById('hud-timer'),
-            timerBar: document.getElementById('timer-bar')
-        };
-        const targetValEl = document.getElementById('target-value');
-        const colorPaletteEl = document.getElementById('color-palette');
-        const activeSlotNameEl = document.getElementById('active-slot-name');
-        const btnSubmit = document.getElementById('btn-submit');
-        const modalExp = document.getElementById('modal-explanation');
-
-        /* --- Utility Functions --- */
-        function formatResistance(ohms) {
-            if (ohms >= 1e6) return `${+(ohms / 1e6).toFixed(2)} MΩ`;
-            if (ohms >= 1e3) return `${+(ohms / 1e3).toFixed(2)} kΩ`;
-            return `${+ohms.toFixed(2)} Ω`;
-        }
-
-        function generateRandomResistor() {
-            // E12 Standard values digits
-            const e12Digits = [10, 12, 15, 18, 22, 27, 33, 39, 47, 56, 68, 82];
-            const randomPair = e12Digits[Math.floor(Math.random() * e12Digits.length)];
-            
-            const digit1Val = Math.floor(randomPair / 10);
-            const digit2Val = randomPair % 10;
-
-            // Multipliers (from 0.01 to 1M)
-            const possibleMults = [0.01, 0.1, 1, 10, 100, 1000, 10000, 100000, 1000000];
-            const multVal = possibleMults[Math.floor(Math.random() * possibleMults.length)];
-
-            // Tolerances (5% Gold or 10% Silver most common)
-            const possibleTols = [5, 10, 1, 2];
-            const tolVal = possibleTols[Math.floor(Math.random() * possibleTols.length)];
-
-            const band1 = COLOR_CODES.find(c => c.value === digit1Val);
-            const band2 = COLOR_CODES.find(c => c.value === digit2Val);
-            const band3 = COLOR_CODES.find(c => c.mult === multVal);
-            const band4 = COLOR_CODES.find(c => c.tolVal === tolVal);
-
-            const totalOhms = (digit1Val * 10 + digit2Val) * multVal;
-
-            return {
-                targetOhms: totalOhms,
-                formattedText: formatResistance(totalOhms),
-                toleranceText: band4.tol,
-                correctBands: [band1.key, band2.key, band3.key, band4.key],
-                bandObjects: [band1, band2, band3, band4]
-            };
-        }
-
-        /* --- Render Cheat Sheet --- */
-        function buildCheatSheet() {
-            const tbody = document.getElementById('cheatsheet-body');
-            tbody.innerHTML = '';
-            COLOR_CODES.forEach(c => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-800/50 transition";
-                tr.innerHTML = `
-                    <td class="py-2 px-2 font-medium flex items-center gap-2">
-                        <span class="w-3.5 h-3.5 rounded-full border border-slate-600 inline-block" style="background-color: ${c.hex}"></span>
-                        ${c.name}
-                    </td>
-                    <td class="py-2 px-2 text-center font-mono text-slate-400">${c.value !== null ? c.value : '-'}</td>
-                    <td class="py-2 px-2 text-center font-mono text-cyan-400">${c.multStr}</td>
-                    <td class="py-2 px-2 text-right font-mono text-amber-400">${c.tol || '-'}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        /* --- Render Color Palette for Active Slot --- */
-        function renderPalette() {
-            colorPaletteEl.innerHTML = '';
-            
-            // Filter options according to active slot requirements
-            let availableColors = COLOR_CODES;
-            if (state.activeSlot === 0 || state.activeSlot === 1) {
-                // Digit slots: must have digit value
-                availableColors = COLOR_CODES.filter(c => c.value !== null);
-                // First band cannot be black (value 0)
-                if (state.activeSlot === 0) {
-                    availableColors = availableColors.filter(c => c.value !== 0);
-                }
-            } else if (state.activeSlot === 2) {
-                // Multiplier slot
-                availableColors = COLOR_CODES.filter(c => c.mult !== undefined);
-            } else if (state.activeSlot === 3) {
-                // Tolerance slot
-                availableColors = COLOR_CODES.filter(c => c.tol !== null);
-            }
-
-            const slotNames = ["1ª Cifra", "2ª Cifra", "Moltiplicatore", "Tolleranza"];
-            activeSlotNameEl.textContent = slotNames[state.activeSlot];
-
-            availableColors.forEach(color => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = `p-2 rounded-xl border border-slate-700 flex flex-col items-center justify-center text-xs font-semibold hover:scale-105 active:scale-95 transition shadow-sm`;
-                btn.style.backgroundColor = color.hex;
-                btn.style.color = (color.key === 'yellow' || color.key === 'white' || color.key === 'silver') ? '#000' : '#fff';
-                
-                btn.innerHTML = `<span>${color.name}</span>`;
-
-                btn.addEventListener('click', () => {
-                    sfx.click();
-                    selectColorForSlot(color.key);
-                });
-                colorPaletteEl.appendChild(btn);
-            });
-        }
-
-        function selectColorForSlot(colorKey) {
-            state.selectedBands[state.activeSlot] = colorKey;
-            updateSlotDisplays();
-            updateSVG();
-
-            // Auto-advance to next empty slot
-            const nextEmpty = state.selectedBands.findIndex(b => b === null);
-            if (nextEmpty !== -1) {
-                setActiveSlot(nextEmpty);
-            } else {
-                if (state.activeSlot < 3) setActiveSlot(state.activeSlot + 1);
-            }
-
-            checkFormCompletion();
-        }
-
-        function setActiveSlot(slotIndex) {
-            state.activeSlot = slotIndex;
-            document.querySelectorAll('.band-slot').forEach((el, idx) => {
-                if (idx === slotIndex) {
-                    el.classList.add('selected', 'bg-slate-700/80');
-                } else {
-                    el.classList.remove('selected', 'bg-slate-700/80');
-                }
-            });
-            renderPalette();
-        }
-
-        function updateSlotDisplays() {
-            state.selectedBands.forEach((colorKey, idx) => {
-                const nameSpan = document.querySelector(`#slot-${idx}-display .color-name`);
-                const badge = document.getElementById(`slot-${idx}-badge`);
-                if (colorKey) {
-                    const c = COLOR_CODES.find(item => item.key === colorKey);
-                    nameSpan.textContent = c.name;
-                    badge.style.backgroundColor = c.hex;
-                } else {
-                    nameSpan.textContent = "Seleziona";
-                    badge.style.backgroundColor = '#475569';
-                }
-            });
-        }
-
-        function updateSVG() {
-            state.selectedBands.forEach((colorKey, idx) => {
-                const svgBand = document.getElementById(`svg-band-${idx + 1}`);
-                if (colorKey) {
-                    const c = COLOR_CODES.find(item => item.key === colorKey);
-                    svgBand.setAttribute('fill', c.hex);
-                } else {
-                    svgBand.setAttribute('fill', '#18181b'); // Default dark
-                }
-            });
-        }
-
-        function checkFormCompletion() {
-            const isComplete = state.selectedBands.every(b => b !== null);
-            btnSubmit.disabled = !isComplete;
-        }
-
-        /* --- Start Game --- */
-        function startGame() {
-            state.score = 0;
-            state.currentQuestion = 1;
-
-            hud.score.textContent = "0";
-            hud.questionNum.textContent = `1 / ${TOTAL_QUESTIONS}`;
-            hud.nickname.textContent = state.nickname;
-
-            screens.welcome.classList.add('hidden');
-            screens.gameover.classList.add('hidden');
-            screens.game.classList.remove('hidden');
-            screens.game.classList.add('flex');
-
-            loadQuestion();
-        }
-
-        function startQuestionTimer() {
-            clearInterval(state.timerId);
-            state.timeLeft = QUESTION_TIME_LIMIT;
-            
-            updateTimerUI();
-
-            state.timerId = setInterval(() => {
-                state.timeLeft--;
-                updateTimerUI();
-
-                if (state.timeLeft <= 10 && state.timeLeft > 0) {
-                    sfx.tick();
-                }
-
-                if (state.timeLeft <= 0) {
-                    clearInterval(state.timerId);
-                    sfx.wrong();
-                    showExplanation(false, "Tempo Scaduto!");
-                }
-            }, 1000);
-        }
-
-        function updateTimerUI() {
-            hud.timer.textContent = `${state.timeLeft}s`;
-            const percentage = (state.timeLeft / QUESTION_TIME_LIMIT) * 100;
-            hud.timerBar.style.width = `${percentage}%`;
-
-            if (state.timeLeft <= 10) {
-                hud.timerBar.style.backgroundColor = "#ef4444"; // Red
-                hud.timer.classList.add('pulse-timer');
-            } else if (state.timeLeft <= 25) {
-                hud.timerBar.style.backgroundColor = "#f59e0b"; // Yellow
-                hud.timer.classList.remove('pulse-timer');
-            } else {
-                hud.timerBar.style.backgroundColor = "#06b6d4"; // Cyan
-                hud.timer.classList.remove('pulse-timer');
-            }
-        }
-
-        function loadQuestion() {
-            hud.questionNum.textContent = `${state.currentQuestion} / ${TOTAL_QUESTIONS}`;
-            state.targetResistor = generateRandomResistor();
-            targetValEl.innerHTML = `${state.targetResistor.formattedText} <span class="text-lg text-slate-400 font-normal">${state.targetResistor.toleranceText}</span>`;
-
-            state.selectedBands = [null, null, null, null];
-            updateSlotDisplays();
-            updateSVG();
-            setActiveSlot(0);
-            checkFormCompletion();
-
-            startQuestionTimer();
-        }
-
-        /* --- Verify Answer & Show Explanation --- */
-        function checkAnswer() {
-            clearInterval(state.timerId);
-            const correct = state.targetResistor.correctBands;
-            const user = state.selectedBands;
-
-            const isCorrect = correct.every((val, idx) => val === user[idx]);
-
-            if (isCorrect) {
-                sfx.correct();
-                state.score++;
-                hud.score.textContent = state.score;
-                showExplanation(true, "Risposta Corretta!");
-            } else {
-                sfx.wrong();
-                showExplanation(false, "Risposta Errata!");
-            }
-        }
-
-        function showExplanation(isCorrect, titleText) {
-            const iconContainer = document.getElementById('explanation-icon-container');
-            const titleEl = document.getElementById('explanation-title');
-            const subTitleEl = document.getElementById('explanation-subtitle');
-            const targetValExp = document.getElementById('exp-target-val');
-            const bandsContainer = document.getElementById('exp-bands-container');
-
-            titleEl.textContent = titleText;
-            targetValExp.textContent = `${state.targetResistor.formattedText} (${state.targetResistor.toleranceText})`;
-
-            if (isCorrect) {
-                iconContainer.className = "w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400";
-                iconContainer.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
-                subTitleEl.textContent = "Ottimo lavoro! Hai composto la sequenza di colori esatta:";
-            } else {
-                iconContainer.className = "w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-3 bg-rose-500/10 border border-rose-500/30 text-rose-400";
-                iconContainer.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
-                subTitleEl.textContent = "Ecco la soluzione corretta per questo valore:";
-            }
-
-            // Render Solution Bands
-            bandsContainer.innerHTML = '';
-            const slotLabels = ["1ª Cifra", "2ª Cifra", "Moltiplicatore", "Tolleranza"];
-            state.targetResistor.bandObjects.forEach((band, idx) => {
-                let desc = "";
-                if (idx === 0 || idx === 1) desc = `Valore = ${band.value}`;
-                else if (idx === 2) desc = `Fattore = ${band.multStr}`;
-                else if (idx === 3) desc = `Tolleranza = ${band.tol}`;
-
-                const bandRow = document.createElement('div');
-                bandRow.className = "flex items-center justify-between p-2 rounded-lg bg-slate-800/80 border border-slate-700/50 text-xs";
-                bandRow.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full border border-slate-600 inline-block shadow-sm" style="background-color: ${band.hex}"></span>
-                        <span class="font-bold text-slate-200">${slotLabels[idx]}: ${band.name}</span>
-                    </div>
-                    <span class="font-mono text-cyan-400 font-semibold">${desc}</span>
-                `;
-                bandsContainer.appendChild(bandRow);
-            });
-
-            modalExp.classList.remove('hidden');
-        }
-
-        function handleNextQuestion() {
-            modalExp.classList.add('hidden');
-            if (state.currentQuestion < TOTAL_QUESTIONS) {
-                state.currentQuestion++;
-                loadQuestion();
-            } else {
-                endGame();
-            }
-        }
-
-        /* --- End Game --- */
-        function endGame() {
-            clearInterval(state.timerId);
-            screens.game.classList.add('hidden');
-            screens.game.classList.remove('flex');
-            screens.gameover.classList.remove('hidden');
-            screens.gameover.classList.add('flex');
-
-            document.getElementById('final-nickname').textContent = state.nickname;
-            document.getElementById('final-score').textContent = state.score;
-
-            // Save score to Firebase Firestore
-            if (window.saveGameScore) {
-                window.saveGameScore(state.nickname, state.score);
-            }
-        }
-
-        window.renderLeaderboard = function() {
-            const listEl = document.getElementById('leaderboard-list');
-            const data = window.getLeaderboardData ? window.getLeaderboardData() : [];
-
-            if (data.length === 0) {
-                listEl.innerHTML = `<div class="text-center py-8 text-slate-500">Nessun punteggio ancora registrato. Gioca per primo!</div>`;
-                return;
-            }
-
-            listEl.innerHTML = '';
-            data.forEach((entry, idx) => {
-                let badge = `<span class="w-6 text-center font-bold text-slate-500">${idx + 1}</span>`;
-                if (idx === 0) badge = `<span class="text-lg">🥇</span>`;
-                if (idx === 1) badge = `<span class="text-lg">🥈</span>`;
-                if (idx === 2) badge = `<span class="text-lg">🥉</span>`;
-
-                const row = document.createElement('div');
-                row.className = "flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-800/80";
-                row.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        ${badge}
-                        <span class="font-semibold text-slate-200 text-sm">${escapeHtml(entry.nickname || 'Anonimo')}</span>
-                    </div>
-                    <span class="font-extrabold text-cyan-400 font-mono text-sm">${entry.score} / 20</span>
-                `;
-                listEl.appendChild(row);
-            });
-        };
-
-        function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        /* --- Event Listeners Setup --- */
-        document.addEventListener('DOMContentLoaded', () => {
-            sfx.init();
-            buildCheatSheet();
-
-            // Start Game Form
-            document.getElementById('form-start').addEventListener('submit', (e) => {
-                e.preventDefault();
-                sfx.init();
-                const nameInput = document.getElementById('player-nickname').value.trim();
-                if (nameInput) {
-                    state.nickname = nameInput;
-                    startGame();
-                }
-            });
-
-            // Slot Click Handlers
-            document.querySelectorAll('.band-slot').forEach(slot => {
-                slot.addEventListener('click', () => {
-                    sfx.click();
-                    const slotIdx = parseInt(slot.getAttribute('data-slot'));
-                    setActiveSlot(slotIdx);
-                });
-            });
-
-            // Submit Answer Button
-            btnSubmit.addEventListener('click', checkAnswer);
-
-            // Next Question from Explanation Modal
-            document.getElementById('btn-next-question').addEventListener('click', () => {
-                sfx.click();
-                handleNextQuestion();
-            });
-
-            // Restart Button
-            document.getElementById('btn-restart').addEventListener('click', () => {
-                sfx.click();
-                startGame();
-            });
-
-            // Leaderboard Modal Controls
-            const modalLb = document.getElementById('modal-leaderboard');
-            const openLb = () => {
-                sfx.click();
-                if (window.renderLeaderboard) window.renderLeaderboard();
-                modalLb.classList.remove('hidden');
-            };
-            const closeLb = () => {
-                sfx.click();
-                modalLb.classList.add('hidden');
-            };
-
-            document.getElementById('btn-leaderboard').addEventListener('click', openLb);
-            document.getElementById('btn-show-scores').addEventListener('click', openLb);
-            document.getElementById('close-leaderboard').addEventListener('click', closeLb);
-            document.getElementById('btn-close-lb').addEventListener('click', closeLb);
-
-            // Cheat Sheet Modal Controls
-            const modalCs = document.getElementById('modal-cheatsheet');
-            document.getElementById('btn-cheatsheet').addEventListener('click', () => {
-                sfx.click();
-                modalCs.classList.remove('hidden');
-            });
-            document.getElementById('close-cheatsheet').addEventListener('click', () => {
-                sfx.click();
-                modalCs.classList.add('hidden');
-            });
-            document.getElementById('btn-close-cs').addEventListener('click', () => {
-                sfx.click();
-                modalCs.classList.add('hidden');
-            });
-        });
-    </script>
+      }
+
+      // Mescola opzioni
+      return options.sort(() => Math.random() - 0.5);
+    }
+
+    // --- FINE PARTITA ---
+    function endGame() {
+      clearInterval(timerInterval);
+      document.getElementById('quiz-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.remove('hidden');
+
+      document.getElementById('final-score').innerText = `${score} / 20`;
+      document.getElementById('final-time').innerText = `${totalTimeTaken}s`;
+
+      loadLeaderboard();
+    }
+
+    // --- GESTIONE CLASSIFICA (STORAGE LOCALE + CONDIVISIONE) ---
+    function getScores() {
+      try {
+        const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch(e) {
+        return [];
+      }
+    }
+
+    function saveScore() {
+      const nameInput = document.getElementById('player-name-input');
+      const name = nameInput.value.trim();
+      const msg = document.getElementById('save-status-msg');
+
+      if (!name) {
+        msg.innerText = "Inserisci un nome valido!";
+        msg.className = "text-xs text-rose-400 font-semibold mt-1";
+        msg.classList.remove('hidden');
+        return;
+      }
+
+      const newEntry = {
+        name: name,
+        score: score,
+        time: totalTimeTaken,
+        date: new Date().toLocaleDateString('it-IT')
+      };
+
+      let scores = getScores();
+      scores.push(newEntry);
+
+      // Ordina: Punti decrescenti, poi Tempo crescente
+      scores.sort((a, b) => b.score - a.score || a.time - b.time);
+      scores = scores.slice(0, 15); // Tieni i primi 15
+
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(scores));
+
+      msg.innerText = "Punteggio salvato con successo!";
+      msg.className = "text-xs text-emerald-400 font-semibold mt-1";
+      msg.classList.remove('hidden');
+
+      document.getElementById('save-score-section').classList.add('opacity-50', 'pointer-events-none');
+      loadLeaderboard();
+    }
+
+    function loadLeaderboard() {
+      const scores = getScores();
+      const startBody = document.getElementById('start-leaderboard-body');
+      const resultsBody = document.getElementById('results-leaderboard-body');
+
+      if (scores.length === 0) {
+        const emptyHtml = `<tr><td colspan="4" class="px-4 py-4 text-center text-slate-500">Nessun punteggio ancora registrato. Sii il primo!</td></tr>`;
+        if (startBody) startBody.innerHTML = emptyHtml;
+        if (resultsBody) resultsBody.innerHTML = emptyHtml;
+        return;
+      }
+
+      const rowsHtml = scores.map((s, idx) => `
+        <tr class="hover:bg-slate-800/40">
+          <td class="px-4 py-2.5 font-bold ${idx === 0 ? 'text-amber-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-amber-600' : 'text-slate-500'}">
+            ${idx + 1}
+          </td>
+          <td class="px-4 py-2.5 font-semibold text-slate-200">${escapeHtml(s.name)}</td>
+          <td class="px-4 py-2.5 text-center font-mono font-bold text-emerald-400">${s.score} / 20</td>
+          <td class="px-4 py-2.5 text-right font-mono text-slate-400">${s.time}s</td>
+        </tr>
+      `).join('');
+
+      if (startBody) startBody.innerHTML = rowsHtml;
+      if (resultsBody) resultsBody.innerHTML = rowsHtml;
+    }
+
+    function isLightColor(colorName) {
+      const c = COLOR_CODES.find(item => item.name.toLowerCase() === colorName.toLowerCase());
+      return c ? c.textLight === false : false;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function initCheatSheet() {
+      const tbody = document.getElementById('cheat-table-body');
+      tbody.innerHTML = COLOR_CODES.map(c => `
+        <tr class="hover:bg-slate-800/50">
+          <td class="p-2 flex items-center gap-2 font-semibold">
+            <span class="w-3.5 h-3.5 rounded-full border border-slate-600" style="background-color: ${c.hex};"></span>
+            ${c.name}
+          </td>
+          <td class="p-2 font-mono">${c.digit !== null ? c.digit : '-'}</td>
+          <td class="p-2 font-mono text-cyan-400">${c.multStr || '-'}</td>
+          <td class="p-2 font-mono text-amber-400">${c.tol || '-'}</td>
+        </tr>
+      `).join('');
+    }
+  </script>
 </body>
 </html>
